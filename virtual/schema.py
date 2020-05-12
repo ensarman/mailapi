@@ -64,13 +64,12 @@ class CreateUser(graphene.Mutation):
         quota = graphene.Int()
 
     def mutate(self, info, domain, email, password, quota):
-        user = User(
+        user = User.objects.create(
             domain_id=domain,
             email=email,
             password=password,
             quota=quota
         )
-        user.save()
 
         return CreateUser(
             id=user.id,
@@ -78,6 +77,25 @@ class CreateUser(graphene.Mutation):
             password=user.password,
             quota=user.quota
         )
+
+class DeleteUser(graphene.Mutation):
+    """
+    Mutation para eliminar un Usuario
+    """
+    id = graphene.Int()
+    email = graphene.String()
+
+    class Arguments:
+        id = graphene.ID()
+
+    user = graphene.Field(UserType)
+
+    def mutate(self, info, id):
+        user = User.objects.get(id=id)
+        email = user.email
+        user.delete()
+
+        return DeleteUser(id=id, email=email)
 
 
 class Query(graphene.ObjectType):
@@ -117,7 +135,7 @@ class Query(graphene.ObjectType):
             return User.objects.get(email=email)
 
     def resolve_all_users(self, info, **kwargs):
-        return User.objects.select_related('domain').all()
+        return User.objects.select_related('domain').all().order_by("-id")
 
     def resolve_all_aliases(self, info, **kwargs):
         return Alias.objects.select_related('domain').all()
@@ -126,3 +144,4 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     create_domain = CreateDomain.Field()
     create_user = CreateUser.Field()
+    delete_user = DeleteUser.Field()
