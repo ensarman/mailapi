@@ -1,0 +1,2 @@
+# mailapi
+API for mailserver
