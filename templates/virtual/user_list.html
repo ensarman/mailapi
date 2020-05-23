@@ -1,0 +1,48 @@
+{% extends 'main.html' %}
+
+{% block body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h2>User List</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4 col-12">
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        {% include 'pagination.html' %}
+        <table class="table table-hover table-sm">
+          <thead class="thead-dark">
+            <tr>
+              <th>id</th>
+              <th>email</th>
+              <th>domain</th>
+              <th>password</th>
+              <th>quota assigned</th>
+              <th>quota used</th>
+              <th>quota percent</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for user in object_list %}
+          <tr>
+            <th>{{ user.id }}</th>
+            <td>{{ user.email }}</td>
+            <td>{{ user.domain }}</td>
+            <td>{{ user.password }}</td>
+            <td>{{ user.quota }}</td>
+            <td>---</td>
+            <td>---</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% include 'pagination.html' %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

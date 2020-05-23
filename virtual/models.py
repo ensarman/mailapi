@@ -1,4 +1,6 @@
 from django.db import models
+from .lib import password
+
 
 # Create your models here.
 
@@ -25,14 +27,44 @@ class User(models.Model):
     """Usuarios del correo electronico"""
     domain = models.ForeignKey(Domain, on_delete=models.CASCADE)
     email = models.EmailField(max_length=100, unique=True)
-    password = models.CharField(max_length=100)
-    quota = models.BigIntegerField()
+    password = models.CharField(max_length=100, blank=False, null=False, default=None)
+    quota = models.BigIntegerField(default=0)
+
+    __previous_password = None
 
     class Meta:
         db_table = 'virtual_users'
 
+    def __init__(self, *args, **kwargs):
+        super(User, self).__init__(*args, **kwargs)
+        self.__previous_password = self.password
+
     def __str__(self):
         return self.email
+
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            """si no hay ID es que es un nuevo usuario"""
+            if self.password:
+                """encripta el password"""
+                self.password = password.crypt_pass(self.password)
+            else:
+                """
+                Si es Usuario nuevo y no se ha definido password
+                pwgen genera un password raw aleatorio y luego lo encipta
+                """
+                self.password = password.crypt_pass(password.pw_gen())
+        else:
+            """si es que hay id es que es un update"""
+            if self.password != self.__previous_password:
+                """significa que ha sido editado"""
+                self.password = password.crypt_pass(self.password)
+        super(User, self).save(*args, **kwargs)
+
+    def quota_used(self):
+        """Obtener la cuota del usuario via IMAP"""
+        pass
 
 
 class Alias(models.Model):
