@@ -1,5 +1,6 @@
 from django import forms
-from .models import User
+from django.forms.fields import EmailInput
+from .models import User, Domain
 
 class UserForm(forms.ModelForm):
 
@@ -12,7 +13,7 @@ class UserForm(forms.ModelForm):
                 'placeholder': "Password",
                 'autocomplete': "new-password",
             }),
-            'email': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "E-Mail"}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': "E-Mail"}),
             'domain': forms.Select(attrs={'class': 'custom-select'}),
             'quota': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Quota'})
         }
@@ -20,3 +21,12 @@ class UserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
         self.fields['domain'].empty_label = None
+
+
+class DomainForm(forms.ModelForm):
+    class Meta:
+        model = Domain
+        fields = {'name'}
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dominio'})
+        }

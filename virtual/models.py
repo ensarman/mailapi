@@ -1,6 +1,6 @@
 from django.db import models
 from .lib import password
-
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -14,7 +14,15 @@ Los nombres de las tablas están en plural por el estandar de ISPmail
 
 class Domain(models.Model):
     """Dominos virtuales"""
-    name = models.URLField(max_length=50, unique=True)
+    name = models.TextField(
+        max_length=50,
+        unique=True,
+        validators=(
+            RegexValidator(
+                regex=r'^[a-zA-Z0-9-]*\.[a-z]*$',
+                message="Enter a valid domain name"
+            ),)
+    )
 
     class Meta:
         db_table = 'virtual_domains'

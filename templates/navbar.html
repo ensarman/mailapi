@@ -17,13 +17,12 @@
           Magnament
         </a>
         <div class="dropdown-menu" aria-labelledby="magnamentDropdown">
-          <a class="dropdown-item" href="">domains</a>
+          <a class="dropdown-item" href="{% url 'mail:domain_list' %}">domains</a>
           <a class="dropdown-item" href="{% url 'mail:user_list' %}">users</a>
           <a class="dropdown-item" href="">redirections</a>
           <a class="dropdown-item" href="">aliases</a>
         </div>
       </li>
-
     </ul>
     <ul class="navbar-nav">
       <li class="nav-item">

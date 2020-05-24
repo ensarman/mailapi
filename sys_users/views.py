@@ -11,3 +11,5 @@ class LoginView(LoginView):
     template_name = "login.html"
     redirect_authenticated_user = True
     success_url = reverse_lazy("mail:user_list")
+    title = "Login Email Magnament"
+

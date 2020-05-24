@@ -1,0 +1,71 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center">
+        <h1>User List</h1>
+      </div>
+    </div>
+    <hr/>
+    {% if form.errors %}
+      <div class="row">
+        {{ form.errors }}
+      </div>
+    {% endif %}
+    <form method="post">
+      <div class="row">
+        {% csrf_token %}
+        <div class="col-12 col-md-3 mt-2 mt-md-auto">{{ form.name }}</div>
+        <div class="col-12 col-md-3 mt-2 mt-md-auto">
+          <button
+              class="btn btn-outline-primary btn-block"
+              type="submit"
+          >
+            New Domain
+          </button>
+        </div>
+      </div>
+    </form>
+    <hr/>
+    <div class="row">
+      <div class="col-12">
+        {% include 'pagination.html' %}
+        <table class="table table-hover table-sm">
+          <thead class="thead-dark">
+          <tr>
+            <th>id</th>
+            <th>Domain</th>
+            <th>Delete</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for domain in object_list %}
+            <tr>
+              <th>{{ domain.id }}</th>
+              <td>{{ domain.name }}</td>
+              <td>
+                <button
+                    class="btn btn-outline-danger"
+                    type="submit"
+                    id="button-delete-{{ domain.id }}"
+                    onclick="get_modal({{ domain.id }},'{{ domain.name }}', '{% url 'mail:domain_delete' domain.id %}', '{{ csrf_token }}')"
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% include 'pagination.html' %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/delete_modal.js' %}"></script>
+{% endblock %}
