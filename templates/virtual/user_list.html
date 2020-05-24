@@ -1,5 +1,5 @@
 {% extends 'main.html' %}
-
+{% load static %}
 {% block body %}
   <div class="container">
     <div class="row">
@@ -46,6 +46,7 @@
             <th>quota assigned</th>
             <th>quota used</th>
             <th>quota percent</th>
+            <th>delete</th>
           </tr>
           </thead>
           <tbody>
@@ -57,6 +58,16 @@
               <td>{{ user.quota }}</td>
               <td>---</td>
               <td>---</td>
+              <td>
+                <button
+                    class="btn btn-outline-danger"
+                    type="submit"
+                    id="button-delete-{{ user.id }}"
+                    onclick="get_modal({{ user.id }},'{{ user.email }}', '{% url 'mail:user_delete' user.id %}', '{{ csrf_token }}')"
+                >
+                  Eliminar
+                </button>
+              </td>
             </tr>
           {% endfor %}
           </tbody>
@@ -65,4 +76,25 @@
       </div>
     </div>
   </div>
+{% endblock %}
+{% block js %}
+  <script src="{% static 'js/delete_modal.js' %}"></script>
+  <script>
+    document.getElementById('{{ form.email.auto_id }}').addEventListener('change', e => {
+      const domain = document.getElementById('{{ form.domain.auto_id }}').selectedOptions[0].innerHTML
+      const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+      if (!e.target.value.match(re))
+        e.target.value = `${e.target.value}@${domain}`;
+      else{
+        const address = e.target.value.split('@')[0];
+        e.target.value = `${address}@${domain}`;
+      }
+    });
+
+    document.getElementById('{{ form.domain.auto_id }}').addEventListener('change', e => {
+      const email_input = document.getElementById('{{ form.email.auto_id }}');
+      const [address, domain] = email_input.value.split('@');
+      email_input.value = `${address}@${e.target.selectedOptions[0].innerHTML}`;
+    })
+  </script>
 {% endblock %}
