@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 class Business(models.Model):
     """Datos de la empresa que nos contrata el servicio"""
     name = models.CharField(max_length=50)
-    id_number = models.CharField(max_length=11)
+    id_number = models.CharField(max_length=11)  # RUC o DNI
 
     def __str__(self):
         return self.name

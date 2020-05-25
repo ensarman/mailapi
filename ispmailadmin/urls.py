@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 from graphene_django.views import GraphQLView
 
 
@@ -23,5 +25,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('sys_users/', include(('sys_users.urls', 'sys_users'), namespace="sys_users")),
-    path('mail_manager/', include(('virtual.urls', 'virtual'), namespace="mail"))
+    path('mail_manager/', include(('virtual.urls', 'virtual'), namespace="mail")),
+    path('', login_required(TemplateView.as_view(template_name='main.html')), name="home")
 ]
