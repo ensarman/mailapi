@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import DomainAdmin, Business
+from .models import DomainAdmin, Company
 
 
 class DomainAdminInline(admin.StackedInline):
@@ -19,8 +19,8 @@ class UserAdmin(BaseUserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
 
 
-@admin.register(Business)
-class BussinessAdmin(admin.ModelAdmin):
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
     pass
 
 admin.site.unregister(User)

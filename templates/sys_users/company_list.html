@@ -1,0 +1,57 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block head %}
+  <link rel="stylesheet" href="{% static 'bootstrap-select/bootstrap-select.min.css' %}">
+{% endblock %}
+
+{% block body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-12 text-center"><h1>Companies Managment</h1></div>
+    </div>
+    <div class="row">
+      <div class="col-12 {{ request.resolver_match.kwargs.company_id|yesno:"col-md-8,," }}">
+        {% include 'pagination.html' %}
+        <table class="table table-hover table-sm">
+          <thead class="thead-dark">
+            <th>Company</th>
+            <th>Company ID</th>
+            <th>Domains</th>
+            <th>Users</th>
+            <th>Actions</th>
+          </thead>
+          {% for company in object_list %}
+            <tr>
+              <td>{{ company.name }}</td>
+              <td>{{ company.id_number }}</td>
+              <td>
+                {% for domain in company.domain.all %}
+                  <p>{{ domain }}</p>
+                {% endfor %}
+              </td>
+              <td>
+                {% for domainadmin in company.domainadmin_set.all %}
+                  <p>{{ domainadmin.user.username }}</p>
+                {% endfor %}
+              </td>
+              <td class="align-middle text-center">
+                <a href="{% url 'sys_users:company' company.id%}" class="btn btn-outline-info"><i class="fas fa-edit"></i></a>
+                <button class="btn btn-outline-danger"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% include 'pagination.html' %}
+      </div>
+      {% if request.resolver_match.kwargs.company_id %}
+      <div class="col-md-4">
+
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'bootstrap-select/bootstrap-select.min.js' %}"></script>
+{% endblock %}

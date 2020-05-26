@@ -84,8 +84,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mailserver',
-        'USER': 'mailadmin',
-        'PASSWORD': 'JE9YgqQ20uXOdFT8WP4BLHiBe1FpcK',
+        'USER': 'root',
+        'PASSWORD': 'mysql',
     }
 }
 
