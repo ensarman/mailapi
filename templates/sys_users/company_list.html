@@ -65,8 +65,9 @@
             <div class="row">
               <div class="col-12">
                 <h4 class="text-center">Domains</h4>
-                <form action="" method="post">
+                <form action="{% url 'sys_users:add_domain' %}" method="post">
                   {% csrf_token %}
+                  <input type="hidden" name="company_id" value="{{ company.id }}">
                   <div class="row">
                     <div class="d-flex col-4 align-items-center">
                       <label class="m-0" for="{{ domain_form.name.auto_id }}">{{ domain_form.name.label }}</label>
@@ -83,6 +84,7 @@
                 </form>
               </div>
             </div>
+            <div class="row">{{ domain_form.errors }}</div>
             <div class="row mt-3">
               <table class="table table-sm table-hover">
                 <thead class="thead-light">
@@ -122,6 +124,7 @@
             </div>
             <form id="new-user-form" class="row mt-3" action="" method="post">
               {% csrf_token %}
+              <input type="hidden" name="company_id" value="{{ company.id }}">
               <div class="col-10">
                 <div class="row">
                   <div class="col-12">{{ user_form.username }}</div>
