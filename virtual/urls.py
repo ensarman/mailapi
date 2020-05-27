@@ -1,5 +1,5 @@
 from django.urls import path, reverse, reverse_lazy
-from django.views.generic import DeleteView
+from django.views.generic import DeleteView, CreateView, ListView
 from .views import BaseList
 from .models import User, Domain, Alias
 from .forms import UserForm, DomainForm
@@ -19,6 +19,7 @@ urlpatterns = [
         success_url=reverse_lazy('mail:domain_list'),
         ordering='-id'
     ), name="domain_list"),
+    path('create_domain/', CreateView.as_view(model=Domain, form_class=DomainForm)),
     path('delete_user/<int:pk>', DeleteView.as_view(
         model=User,
         success_url=reverse_lazy('mail:user_list'),

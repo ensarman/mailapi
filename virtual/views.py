@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DeleteView
+from django.views.generic import ListView, DeleteView, CreateView
 from django.views.generic.list import BaseListView, MultipleObjectMixin, MultipleObjectTemplateResponseMixin
 from django.views.generic.edit import FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -40,6 +40,5 @@ class BaseList(LoginRequiredMixin, ListView, FormMixin):
         context = super().get_context_data()
         context['form'] = form
         return self.render_to_response(context=context)
-
 
 

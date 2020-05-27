@@ -25,7 +25,7 @@
       </li>
       {% if user.is_staff %}
       <li class="nav-item">
-        <a class="nav-link" href="">Companies Magnament</a>
+        <a class="nav-link" href="{% url 'sys_users:company' %}">Companies Magnament</a>
       </li>
       {% endif %}
     </ul>

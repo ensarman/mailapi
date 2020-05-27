@@ -14,7 +14,7 @@ class DomainAdminInline(admin.StackedInline):
     verbose_name_plural = 'Domain Admins'
 
 
-class UserAdmin(BaseUserAdmin):
+class SysUser(BaseUserAdmin):
     inlines = (DomainAdminInline,)
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
 
@@ -24,4 +24,4 @@ class CompanyAdmin(admin.ModelAdmin):
     pass
 
 admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+admin.site.register(User, SysUser)
