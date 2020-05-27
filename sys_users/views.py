@@ -6,7 +6,7 @@ from django.views.generic import ListView, FormView
 
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
-
+from django.shortcuts import redirect
 from django.db import transaction
 
 from .models import Company, DomainAdmin
@@ -62,7 +62,7 @@ class CreateDomainView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-
+        return redirect('sys_users:company')
 
     def get_success_url(self, **kwargs):
         return reverse_lazy('sys_users:company', kwargs={'company_id': self.request.POST.get('company_id')})
