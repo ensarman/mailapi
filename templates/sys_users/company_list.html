@@ -47,7 +47,8 @@
         <div class="col-lg-4">
           <div class="container-fluid">
             <div class="row">
-              <div class="col-8">
+
+              <div class="col-6">
                 <h2 class='text-center'>{{ company }}</h2>
               </div>
               <div class="col-2">
@@ -60,14 +61,20 @@
                   <i class="fas fa-users"></i>
                 </button>
               </div>
+              <div class="col-2">
+                  <a class="btn btn-outline-secondary" href="{% url 'sys_users:company' %}">
+                    <i class="fas fa-times"></i>
+                  </a>
+              </div>
             </div>
             <hr/>
             <div class="row">
               <div class="col-12">
                 <h4 class="text-center">Domains</h4>
-                <form action="{% url 'sys_users:add_domain' %}" method="post">
+                <form action="" method="post">
                   {% csrf_token %}
                   <input type="hidden" name="company_id" value="{{ company.id }}">
+                  <input type="hidden" name="form" value="domain">
                   <div class="row">
                     <div class="d-flex col-4 align-items-center">
                       <label class="m-0" for="{{ domain_form.name.auto_id }}">{{ domain_form.name.label }}</label>
@@ -84,7 +91,7 @@
                 </form>
               </div>
             </div>
-            <div class="row">{{ domain_form.errors }}</div>
+            <div class="row text-danger">{{ domain_form.errors }}</div>
             <div class="row mt-3">
               <table class="table table-sm table-hover">
                 <thead class="thead-light">
@@ -125,6 +132,7 @@
             <form id="new-user-form" class="row mt-3" action="" method="post">
               {% csrf_token %}
               <input type="hidden" name="company_id" value="{{ company.id }}">
+              <input type="hidden" name="form" value="user">
               <div class="col-10">
                 <div class="row">
                   <div class="col-12">{{ user_form.username }}</div>

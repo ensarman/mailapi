@@ -16,7 +16,6 @@ class BaseList(LoginRequiredMixin, ListView, FormMixin):
 
     def __init__(self, *args, **kwargs):
         super(BaseList, self).__init__(*args, **kwargs)
-        self.object_list = self.get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -31,12 +30,14 @@ class BaseList(LoginRequiredMixin, ListView, FormMixin):
             return self.form_invalid(form)
 
     def form_valid(self, form):
+        self.object_list = self.get_queryset()
         context = super().get_context_data()
         form.save()
         context['form'] = form
         return self.render_to_response(context=context)
 
     def form_invalid(self, form):
+        self.object_list = self.get_queryset()
         context = super().get_context_data()
         context['form'] = form
         return self.render_to_response(context=context)
