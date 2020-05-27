@@ -1,6 +1,5 @@
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.forms import UserCreationForm
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic import ListView
@@ -11,6 +10,7 @@ from django.urls import reverse_lazy
 from .models import Company, DomainAdmin
 from .forms import CreateUserForm
 from virtual.forms import DomainForm
+from virtual.models import Domain
 
 # Create your views here.
 
