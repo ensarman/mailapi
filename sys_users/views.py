@@ -53,6 +53,7 @@ class CompanyView(LoginRequiredMixin, ListView):
     @transaction.atomic
     def post(self, *args, **kwargs):
         if self.request.POST.get('form') == 'domain':
+            """Si el formulario es de dominios"""
             form = DomainForm(self.request.POST)
             if form.is_valid():
                 domain = form.save()
@@ -64,6 +65,20 @@ class CompanyView(LoginRequiredMixin, ListView):
                 context = self.get_context_data()
                 context['domain_form'] = form
                 return self.render_to_response(context)
+
         if self.request.POST.get('form') == 'user':
-            pass
+            """si el formulario es del usuarios"""
+            form = CreateUserForm(self.request.POST)
+            if form.is_valid():
+                user = form.save()
+                company = Company.objects.get(id=self.request.POST.get('company_id'))
+                sys_user = DomainAdmin.objects.create(user=user)
+                sys_user.company.add(company)
+                return redirect('sys_users:company', self.request.POST.get('company_id'))
+            else:
+                self.object_list = self.get_queryset()
+                context = self.get_context_data()
+                context['user_form'] = form
+                return self.render_to_response(context)
+
 
