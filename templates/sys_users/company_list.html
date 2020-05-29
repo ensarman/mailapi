@@ -43,17 +43,30 @@
         </table>
         {% include 'pagination.html' %}
       </div>
+{#    ----------------------------------------------------------------------------------   #}
       {% if request.resolver_match.kwargs.company_id %}
         <div class="col-lg-4">
           <div class="container-fluid">
             <div class="row">
 
-              <div class="col-6">
+              <div class="col-10">
                 <h2 class='text-center'>{{ company }}</h2>
               </div>
+
               <div class="col-2">
-                <button class="btn btn-outline-secondary">
-                  <i class="fas fa-globe"></i>
+                <a class="btn btn-outline-secondary" href="{% url 'sys_users:company' %}">
+                  <i class="fas fa-times"></i>
+                </a>
+              </div>
+            </div>
+            <hr/>
+            <div class="row">
+              <div class="col-8">
+                <h4 class="text-center">Domains</h4>
+              </div>
+                <div class="col-2">
+                <button id="new-domain-btn" class="btn btn-outline-secondary">
+                  <i class="fas fa-plus"></i>
                 </button>
               </div>
               <div class="col-2">
@@ -61,17 +74,8 @@
                   <i class="fas fa-users"></i>
                 </button>
               </div>
-              <div class="col-2">
-                  <a class="btn btn-outline-secondary" href="{% url 'sys_users:company' %}">
-                    <i class="fas fa-times"></i>
-                  </a>
-              </div>
             </div>
-            <hr/>
-            <div class="row">
-              <div class="col-12">
-                <h4 class="text-center">Domains</h4>
-                <form action="" method="post">
+                <form id="new-domain-form" class="row d-none mt-3" action="" method="post">
                   {% csrf_token %}
                   <input type="hidden" name="company_id" value="{{ company.id }}">
                   <input type="hidden" name="form" value="domain">
@@ -89,8 +93,7 @@
                     </div>
                   </div>
                 </form>
-              </div>
-            </div>
+
             <div class="row text-danger">{{ domain_form.errors }}</div>
             <div class="row mt-3">
               <table class="table table-sm table-hover">
@@ -103,7 +106,10 @@
                   <tr>
                     <td>{{ domain }}</td>
                     <td class="text-center">
-                      <button class="btn btn-outline-danger">
+                      <button
+                        onclick="get_modal('{{ domain.id }}', '{{ domain.name }}', '{% url 'sys_users:remove_domain' view.kwargs.company_id domain.id %}', '{{ csrf_token }}')"
+                        class="btn btn-outline-danger"
+                      >
                         <i class="fas fa-trash"></i>
                       </button>
                     </td>
@@ -118,7 +124,7 @@
                 <h4 class="text-center">Users</h4>
               </div>
               <div class="col-2">
-                <button id="new-user-btn" class="btn btn-secondary" type="button">
+                <button id="new-user-btn" class="btn btn-outline-secondary" type="button">
                   <i class="fas fa-user-plus"></i>
                 </button>
               </div>
@@ -128,7 +134,7 @@
                 </button>
               </div>
             </div>
-            <form id="new-user-form" class="row mt-3" action="" method="post">
+            <form id="new-user-form" class="row mt-3 d-none" action="" method="post">
               {% csrf_token %}
               <input type="hidden" name="company_id" value="{{ company.id }}">
               <input type="hidden" name="form" value="user">
@@ -147,9 +153,8 @@
                 </button>
               </div>
             </form>
-
+            <div class="row text-danger">{{ user_form.errors }}</div>
             <div class="row mt-3">
-              <div class="col-12">
                 <table class="table table-sm table-hover">
                   <thead class="thead-light">
                   <th>Username</th>
@@ -160,15 +165,17 @@
                     <tr>
                       <td>{{ user }}</td>
                       <td class="text-center">
-                        <button class="btn btn-outline-danger">
-                          <i class="fas fa-trash"></i>
-                        </button>
+                        <button
+                        onclick="get_modal('{{ user.user.pk }}', '{{ user.user.username }}', '{% url 'sys_users:remove_user' view.kwargs.company_id user.user.id %}', '{{ csrf_token }}')"
+                        class="btn btn-outline-danger"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
                       </td>
                     </tr>
                   {% endfor %}
                   </tbody>
                 </table>
-              </div>
             </div>
           </div>
         </div>
@@ -178,5 +185,18 @@
 {% endblock %}
 
 {% block js %}
-  <script src="{% static 'bootstrap-select/bootstrap-select.min.js' %}"></script>
+  {% if request.resolver_match.kwargs.company_id %}
+  <script>
+    const toggle_block = (button, block) => {
+      button.addEventListener("click", () => {
+        block.classList.toggle('d-none');
+        button.classList.toggle('btn-secondary');
+        button.classList.toggle('btn-outline-secondary');
+      })
+    };
+    toggle_block(document.getElementById('new-user-btn'), document.getElementById('new-user-form'));
+    toggle_block(document.getElementById('new-domain-btn'), document.getElementById('new-domain-form'))
+  </script>
+    <script src="{% static 'js/delete_modal.js' %}"></script>
+  {% endif %}
 {% endblock %}

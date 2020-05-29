@@ -1,8 +1,8 @@
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.views.generic import ListView, FormView, CreateView
+from django.views.generic import ListView, DeleteView
 
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
@@ -82,3 +82,17 @@ class CompanyView(LoginRequiredMixin, ListView):
                 return self.render_to_response(context)
 
 
+@method_decorator(staff_member_required, name='dispatch')
+class RemoveDomain(LoginRequiredMixin, DeleteView):
+    model = Domain
+
+    def get_success_url(self):
+        return reverse_lazy('sys_users:company', kwargs={'company_id': self.kwargs.get('company_id')})
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class RemoveUser(LoginRequiredMixin, DeleteView):
+    model = get_user_model()
+
+    def get_success_url(self):
+        return reverse_lazy('sys_users:company', kwargs={'company_id': self.kwargs.get('company_id')})
