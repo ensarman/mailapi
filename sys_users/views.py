@@ -116,7 +116,7 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             """ Todos los dominios de la compañía seleccionada """
             if self.kwargs.get('domain_id'):
                 """si es que hay domain_id en la url"""
-                self.domains = user.company.all().get(id=self.kwargs.get('company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
+                self.domains = self.companies.get(id=self.kwargs.get('company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
             else:
                 self.domains = user.company.all().get(id=self.kwargs.get('company_id')).domain.all()
             emails = Email.objects.none()
@@ -134,14 +134,18 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             ni solo tiene una compañia
             tiene que devolver todos los dominios del usuario
             """
+
             self.domains = Domain.objects.none()
             for company in self.companies:  # crear queryset de todos los dominios
                 self.domains = self.domains | company.domain.all()
 
+            if self.kwargs.get('domain_id'):
+                """esto esta muy hardcoded, hay que suavsarlo un poco"""
+                self.domains = self.domains.filter(id=self.kwargs.get('domain_id'))
+
             emails = Email.objects.none()
-            for company in self.companies:
-                for domain in company.domain.all():
-                    emails = emails | domain.user_set.all()
+            for domain in self.domains:
+                emails = emails | domain.user_set.all()
 
         # configurando el filtro para la búsqueda
         if self.request.GET.get('email'):

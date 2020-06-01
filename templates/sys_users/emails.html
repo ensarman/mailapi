@@ -22,10 +22,12 @@
       <div class="col-12 col-lg-3">
         <div class="list-group">
           {% for domain in domains %}
+            <a
             {% if view.kwargs.company_id %}
-            <a href="{% url 'sys_users:email_by_domain' view.kwargs.company_id domain.id %}"
+              href="{% url 'sys_users:email_by_domain' view.kwargs.company_id domain.id %}"
             {% else %}
-            <a href="{% url 'sys_users:email_by_domain' '0' domain.id %}"
+              
+              href="{% url 'sys_users:email_by_domain' '0' domain.id %}"
             {% endif %}
               class="list-group-item list-group-item-action"
             >
