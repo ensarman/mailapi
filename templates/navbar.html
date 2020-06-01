@@ -17,16 +17,24 @@
           Email Magnament
         </a>
         <div class="dropdown-menu" aria-labelledby="magnamentDropdown">
-          <a class="dropdown-item" href="{% url 'mail:domain_list' %}">domains</a>
-          <a class="dropdown-item" href="{% url 'mail:user_list' %}">users</a>
-          <a class="dropdown-item" href="">redirections</a>
-          <a class="dropdown-item" href="">aliases</a>
+          {% if user.is_staff %}
+            <a class="dropdown-item" href="{% url 'mail:domain_list' %}">global domains</a>
+            <a class="dropdown-item" href="{% url 'mail:user_list' %}">global users</a>
+            <a class="dropdown-item" href="">global redirections</a>
+            <a class="dropdown-item" href="">global aliases</a>
+          {% else %}
+            <a class="dropdown-item" href="{% url 'sys_users:email_by_domain' %}">Email</a>
+            {% block navbar %}
+
+            {% endblock %}
+          {% endif %}
         </div>
+
       </li>
       {% if user.is_staff %}
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'sys_users:company' %}">Companies Magnament</a>
-      </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'sys_users:company' %}">Companies Magnament</a>
+        </li>
       {% endif %}
     </ul>
     <ul class="navbar-nav">

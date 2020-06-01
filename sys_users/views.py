@@ -12,7 +12,7 @@ from django.db import transaction
 from .models import Company, DomainAdmin
 from .forms import CreateUserForm
 from virtual.forms import DomainForm
-from virtual.models import Domain
+from virtual.models import Domain, User as Email
 
 
 # Create your views here.
@@ -96,3 +96,60 @@ class RemoveUser(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('sys_users:company', kwargs={'company_id': self.kwargs.get('company_id')})
+
+
+class ListEmailByDomain(LoginRequiredMixin, ListView):
+    """Lista los emails por dominio, pero verificando la autenticacion,
+     osea los dominios que le corresponden al usuario logueado"""
+    title = "Email List By Domain"
+    model = Email  # el queryset debe retornar los usuarios de emails
+    paginate_by = 10
+    companies = None
+    domains = None
+    template_name = 'sys_users/emails.html'
+
+    def get_queryset(self):
+        user = self.request.user.domainadmin
+        self.companies = user.company.all()
+
+        if self.kwargs.get('company_id'):
+            """ Todos los dominios de la compañía seleccionada """
+            if self.kwargs.get('domain_id'):
+                """si es que hay domain_id en la url"""
+                self.domains = user.company.all().get(id=self.kwargs.get('company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
+            else:
+                self.domains = user.company.all().get(id=self.kwargs.get('company_id')).domain.all()
+            emails = Email.objects.none()
+            for domain in self.domains:
+                emails = emails | domain.user_set.all()
+            return emails
+
+        elif self.companies.__len__() == 1:
+            """Cuando no hay company pero hay solo una"""
+            self.domains = self.companies[0].domain.all()
+            emails = Email.objects.none()
+            for domain in self.domains:
+                emails = emails | domain.user_set.all()
+            return emails
+        else:
+            """cuando no hay ni company_id 
+            ni solo tiene una compañia
+            tiene que devolver todos los dominios del usuario
+            """
+            self.domains = Domain.objects.none()
+            for company in self.companies:  # crear queryset de todos los dominios
+                self.domains = self.domains | company.domain.all()
+
+            emails = Email.objects.none()
+            for company in self.companies:
+                for domain in company.domain.all():
+                    emails = emails | domain.user_set.all()
+
+            return emails
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ListEmailByDomain, self).get_context_data(*args, **kwargs)
+        context['companies'] = self.companies
+        context['domains'] = self.domains
+        context['emails'] = self.get_queryset  # Alias para los emails
+        return context

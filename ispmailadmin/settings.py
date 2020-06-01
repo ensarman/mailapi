@@ -116,7 +116,7 @@ AUTHENTICATION_BACKENDS = [
     'graphql_jwt.backends.JSONWebTokenBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-LOGIN_REDIRECT_URL = "mail:user_list"
+LOGIN_REDIRECT_URL = "sys_users:email_by_domain"
 LOGIN_URL = "sys_users:login"
 LOGOUT_REDIRECT_URL = "sys_users:login"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

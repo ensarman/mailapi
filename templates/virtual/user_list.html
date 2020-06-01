@@ -80,6 +80,7 @@
 {% block js %}
   <script src="{% static 'js/delete_modal.js' %}"></script>
   <script>
+    // TODO: arreglar cuando está mal escrito el dominio
     document.getElementById('{{ form.email.auto_id }}').addEventListener('change', e => {
       const domain = document.getElementById('{{ form.domain.auto_id }}').selectedOptions[0].innerHTML
       const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
