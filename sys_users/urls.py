@@ -1,13 +1,15 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-
+from django.views.generic import DeleteView
 from .views import (
     LoginView,
     CompanyView,
     RemoveDomain,
     RemoveUser,
+    RemoveEmail,
     ListEmailByDomain
 )
+from virtual.models import User as Email
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name="login"),
@@ -31,4 +33,5 @@ urlpatterns = [
         ListEmailByDomain.as_view(),
         name="email_by_domain"
     ),
+    path('remove_email/<int:company_id>/<int:domain_id>/<int:pk>', RemoveEmail.as_view(), name='remove_email')
 ]

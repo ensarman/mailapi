@@ -1,4 +1,5 @@
 {% extends 'main.html' %}
+{% load static %}
 
 {% block body %}
   <div class="container">
@@ -36,9 +37,15 @@
       </div>
       <div class=" col-12 col-lg-9">
       {% include 'pagination.html' %}
+        <form action="" method="get">
         <table class="table table-sm table-hover">
           <thead class="thead-dark">
-          <th>Email</th>
+          <th id="email">
+            <span>Email</span>
+            <a href="#" class="search-button">
+              <i class="ml-3 fas fa-search"></i>
+            </a>
+          </th>
           <th>Domain</th>
           <th>Quota</th>
           <th>Quota Used</th>
@@ -55,7 +62,13 @@
                   <button class="btn btn-outline-primary" type="submit">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn btn-outline-danger" type="submit">
+                  <button
+                      {% if view.kwargs.company_id %}
+                      onclick="get_modal('{{ email.pk }}', '{{ email.email }}', '{% url 'sys_users:remove_email' view.kwargs.company_id email.domain.pk email.pk %}', '{{ csrf_token }}')"
+                      {% else %}
+                      onclick="get_modal('{{ email.pk }}', '{{ email.email }}', '{% url 'sys_users:remove_email' '0' email.domain.pk email.pk %}', '{{ csrf_token }}')"
+                      {% endif %}
+                      class="btn btn-outline-danger" type="button">
                     <i class="fas fa-trash"></i>
                   </button>
                 </td>
@@ -63,9 +76,15 @@
             {% endfor %}
           </tbody>
         </table>
+        </form>
       {% include 'pagination.html' %}
       </div>
     </div>
     {% endif %}
   </div>
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/delete_modal.js' %}"></script>
+  <script src="{% static 'js/search.js' %}"></script>
 {% endblock %}

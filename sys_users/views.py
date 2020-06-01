@@ -122,7 +122,6 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             emails = Email.objects.none()
             for domain in self.domains:
                 emails = emails | domain.user_set.all()
-            return emails
 
         elif self.companies.__len__() == 1:
             """Cuando no hay company pero hay solo una"""
@@ -130,7 +129,6 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             emails = Email.objects.none()
             for domain in self.domains:
                 emails = emails | domain.user_set.all()
-            return emails
         else:
             """cuando no hay ni company_id 
             ni solo tiene una compañia
@@ -145,7 +143,11 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
                 for domain in company.domain.all():
                     emails = emails | domain.user_set.all()
 
-            return emails
+        # configurando el filtro para la búsqueda
+        if self.request.GET.get('email'):
+            emails = emails.filter(email__icontains=self.request.GET.get('email'))
+
+        return emails
 
     def get_context_data(self, *args, **kwargs):
         context = super(ListEmailByDomain, self).get_context_data(*args, **kwargs)
@@ -153,3 +155,12 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
         context['domains'] = self.domains
         context['emails'] = self.get_queryset  # Alias para los emails
         return context
+
+class RemoveEmail(LoginRequiredMixin, DeleteView):
+    model = Email
+
+    def get_success_url(self):
+        return reverse_lazy('sys_users:email_by_domain', kwargs={
+            'company_id': self.kwargs.get('company_id'),
+            'domain_id': self.kwargs.get('domain_id')
+        })
