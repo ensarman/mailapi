@@ -104,6 +104,7 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
     title = "Email List By Domain"
     model = Email  # el queryset debe retornar los usuarios de emails
     paginate_by = 10
+    ordering = 'email'
     companies = None
     domains = None
     template_name = 'sys_users/emails.html'
@@ -151,7 +152,7 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
         if self.request.GET.get('email'):
             emails = emails.filter(email__icontains=self.request.GET.get('email'))
 
-        return emails
+        return emails.order_by('domain')
 
     def get_context_data(self, *args, **kwargs):
         context = super(ListEmailByDomain, self).get_context_data(*args, **kwargs)
@@ -168,3 +169,4 @@ class RemoveEmail(LoginRequiredMixin, DeleteView):
             'company_id': self.kwargs.get('company_id'),
             'domain_id': self.kwargs.get('domain_id')
         })
+
