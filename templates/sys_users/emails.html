@@ -26,7 +26,7 @@
             {% if view.kwargs.company_id %}
               href="{% url 'sys_users:email_by_domain' view.kwargs.company_id domain.id %}"
             {% else %}
-              
+
               href="{% url 'sys_users:email_by_domain' '0' domain.id %}"
             {% endif %}
               class="list-group-item list-group-item-action"
@@ -37,7 +37,7 @@
           {% endfor %}
         </div>
       </div>
-      <div class=" col-12 col-lg-9">
+      <div class="mt-3 mt-lg-0 col-12 col-lg-9">
       {% include 'pagination.html' %}
         <form action="" method="get">
         <table class="table table-sm table-hover">
@@ -61,7 +61,11 @@
                 <td>{{ email.quota }}</td>
                 <td>--</td>
                 <td>
-                  <button class="btn btn-outline-primary" type="submit">
+                  <button
+                      class="btn btn-outline-primary"
+                      type="button"
+                      onclick="edit_email('{{ email.pk }}', '{% url 'virtual:user_detail_json' email.pk %}', '{{ csrf_token }}')"
+                  >
                     <i class="fas fa-edit"></i>
                   </button>
                   <button
@@ -89,4 +93,59 @@
 {% block js %}
   <script src="{% static 'js/delete_modal.js' %}"></script>
   <script src="{% static 'js/search.js' %}"></script>
+  <script>
+    const edit_email = (id, url, csrf_token) => {
+      $('.modal').remove();
+
+      let email = null;
+      let quota = null;
+      let password = null;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            email = data.email;
+            quota = data.quota;
+            password = data.password;
+        });
+
+      const modal = document.createElement('div');
+      modal.setAttribute('id', `modal-${id}`);
+      modal.setAttribute('tabindex', '-1');
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-labelledby', "ModalLabel");
+      modal.setAttribute('aria-hidden', "true");
+      modal.classList.add("modal", "fade");
+
+      modal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="ModalLabel">Editing ${email}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form method="post" action="${url}">
+
+              <div class="modal-body">
+                <input type="text" type="pasword" name="password" value="">
+                <input type="text" name="password" value="">
+              </div>
+              <div class="modal-footer">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
+                  <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-outline-primary">Delete</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `.trim();
+
+      $(modal).on('hidden.bs.modal', function () {
+                $(this).remove();
+            }).modal('show');
+
+    }
+  </script>
 {% endblock %}
