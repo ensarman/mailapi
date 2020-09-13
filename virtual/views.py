@@ -1,9 +1,15 @@
-from django.views.generic import ListView, DeleteView, CreateView
+from django.views.generic import ListView, UpdateView, DetailView, View
+from django.views.generic.detail import BaseDetailView
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import FormMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse, HttpResponse
+from django.core import serializers
+from django.forms.models import model_to_dict
+
+import json
 
 from .models import User, Domain
 
@@ -46,4 +52,16 @@ class BaseList(LoginRequiredMixin, ListView, FormMixin):
 
 
 
+def user_detail_json(request, pk):
+    user = User.objects.get(id=pk)
+
+    dict ={
+        'email': user.email,
+        'domain': user.email.__str__(),
+        'quota': user.quota,
+    }
+    #dict = model_to_dict(user)
+    #del dict['password']
+
+    return HttpResponse(json.dumps(dict), content_type='application/json')
 
