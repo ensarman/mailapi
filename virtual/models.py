@@ -36,7 +36,7 @@ class User(models.Model):
     domain = models.ForeignKey(Domain, on_delete=models.CASCADE)
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=100, blank=True, null=False, default=None)
-    quota = models.BigIntegerField(default=0)
+    quota = models.PositiveBigIntegerField(default=1)
 
     __previous_password = None
 
