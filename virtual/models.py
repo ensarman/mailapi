@@ -6,9 +6,9 @@ from django.core.validators import RegexValidator
 
 
 """
-Estos modelos siguen el estandar creado por ISPmail 
+Estos modelos siguen el estandar creado por ISPmail
 si hay algo raro es que los nombres estan de acuerdo a ese estandar
-Los nombres de las tablas están en plural por el estandar de ISPmail 
+Los nombres de las tablas están en plural por el estandar de ISPmail
 """
 
 
@@ -35,10 +35,12 @@ class User(models.Model):
     """Usuarios del correo electronico"""
     domain = models.ForeignKey(Domain, on_delete=models.CASCADE)
     email = models.EmailField(max_length=100, unique=True)
-    password = models.CharField(max_length=100, blank=True, null=False, default=None)
+    password = models.CharField(
+        max_length=100, blank=True, null=False, default=None)
     quota = models.PositiveBigIntegerField(default=1)
 
     __previous_password = None
+    __byte_to_gigabyte_factor = 1073741824
 
     class Meta:
         db_table = 'virtual_users'
@@ -50,6 +52,8 @@ class User(models.Model):
     def __str__(self):
         return self.email
 
+    def quota_gb(self):
+        return self.quota/self.__byte_to_gigabyte_factor
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -68,6 +72,7 @@ class User(models.Model):
             if self.password != self.__previous_password:
                 """significa que ha sido editado"""
                 self.password = password.crypt_pass(self.password)
+        self.quota *= self.__byte_to_gigabyte_factor
         super(User, self).save(*args, **kwargs)
 
     def quota_used(self):

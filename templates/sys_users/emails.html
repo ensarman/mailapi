@@ -31,7 +31,6 @@
             {% endif %}
               class="list-group-item list-group-item-action"
             >
-
               {{ domain }}
             </a>
           {% endfor %}
@@ -42,16 +41,17 @@
         <form action="" method="get">
         <table class="table table-sm table-hover">
           <thead class="thead-dark">
-          <th id="email">
-            <span>Email</span>
-            <a href="#" class="search-button">
-              <i class="ml-3 fas fa-search"></i>
-            </a>
-          </th>
-          <th>Domain</th>
-          <th>Quota</th>
-          <th>Quota Used</th>
-          <th>actions</th>
+            <th id="email">
+              <span>Email</span>
+              <a href="#" class="search-button">
+                <i class="ml-3 fas fa-search"></i>
+              </a>
+            </th>
+            <th>Domain</th>
+            <th>Quota</th>
+            <th>Quota Used</th>
+            <th><span>actions</span></th>
+            <th><a href="#" class="" data-toggle="modal" data-target="#NewEmailModal"><i class="fas fa-plus-square"></i></a></th>
           </thead>
           <tbody class="small">
             {% for email in object_list %}
@@ -60,7 +60,7 @@
                 <td>{{ email.domain }}</td>
                 <td>{{ email.quota }}</td>
                 <td>--</td>
-                <td>
+                <td colspan="2">
                   <button
                       class="btn btn-outline-primary"
                       type="button"
@@ -88,6 +88,56 @@
     </div>
     {% endif %}
   </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="NewEmailModal" tabindex="-1" role="dialog" aria-labelledby="NewEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="NewEmailModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="">
+          <div class="container-fluid">
+              <div class="modal-body">
+                <input type="hidden" name="domain" value="{{ current_domain.id }}">
+                <div class="row mb-3">
+                    <div class="col-3">
+                      <label for="{{ view.email_form.email.auto_id }}">Email:</label>
+                    </div>
+                    <div class="col-9">
+                      {{ view.email_form.email }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-3">
+                    <label for="{{ view.email_form.password.auto_id }}">Password:</label>
+                  </div>
+                  <div class="col-9">
+                    {{ view.email_form.password }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-3">
+                    <label for="{{ view.email_form.quota.auto_id }}">Quota:</label>
+                  </div>
+                  <div class="col-9">
+                    {{ view.email_form.quota }}
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 
 {% block js %}
@@ -146,6 +196,18 @@
                 $(this).remove();
             }).modal('show');
 
-    }
+    };
+
+    // arregla el email le coloca el dominio correspondiente
+    document.getElementById('{{ view.email_form.email.auto_id }}').addEventListener('change', e => {
+      const domain = "{{ current_domain.name }}";
+      const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+      if (!e.target.value.match(re))
+        e.target.value = `${e.target.value}@${domain}`;
+      else{
+        const address = e.target.value.split('@')[0];
+        e.target.value = `${address}@${domain}`;
+      }
+    });
   </script>
 {% endblock %}

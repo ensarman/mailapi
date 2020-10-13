@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '%empt==-&ww@+6rz!&d@hg1&x&)&t$8i=p8smukftnbm+6#j$v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
+# DEBUG = True
 DEBUG = False if os.environ.get('DJANGO_DEPLOY') == "1" else True
 
 ALLOWED_HOSTS = []
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'ispmailadmin.urls'
@@ -80,12 +80,14 @@ WSGI_APPLICATION = 'ispmailadmin.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        'unix_socket': '/var/run/mysqld//var/run/mysqld.sock',
         'NAME': 'mailserver',
-        'USER': 'root',
-        'PASSWORD': 'mysql',
+        # 'USERNAME': 'kike',
+        # 'PASSWORD': 'mysql',
     }
 }
 
@@ -152,4 +154,3 @@ GRAPHENE = {
 
 # Cambiar en producción
 CORS_ORIGIN_ALLOW_ALL = True
-

@@ -11,13 +11,16 @@ from django.db import transaction
 
 from .models import Company, DomainAdmin
 from .forms import CreateUserForm
-from virtual.forms import DomainForm
+from virtual.forms import DomainForm, UserForm as EmailForm
 from virtual.models import Domain, User as Email
 
 
 # Create your views here.
 
 class LoginView(LoginView):
+    """
+    To login ;)
+    """
     template_name = "sys_users/login.html"
     redirect_authenticated_user = True
     success_url = reverse_lazy("mail:user_list")
@@ -30,6 +33,9 @@ class sysUsers(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class CompanyView(LoginRequiredMixin, ListView):
+    """
+    ListView of all companies
+    """
     model = Company
     ordering = '-id'
     paginate_by = 5
@@ -84,6 +90,9 @@ class CompanyView(LoginRequiredMixin, ListView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class RemoveDomain(LoginRequiredMixin, DeleteView):
+    """
+    Removes a domaain
+    """
     model = Domain
 
     def get_success_url(self):
@@ -92,6 +101,9 @@ class RemoveDomain(LoginRequiredMixin, DeleteView):
 
 @method_decorator(staff_member_required, name='dispatch')
 class RemoveUser(LoginRequiredMixin, DeleteView):
+    """
+    Removes a system user
+    """
     model = get_user_model()
 
     def get_success_url(self):
@@ -99,8 +111,10 @@ class RemoveUser(LoginRequiredMixin, DeleteView):
 
 
 class ListEmailByDomain(LoginRequiredMixin, ListView):
-    """Lista los emails por dominio, pero verificando la autenticacion,
-     osea los dominios que le corresponden al usuario logueado"""
+    """
+    Lista los emails por dominio, pero verificando la autenticacion,
+    osea los dominios que le corresponden al usuario logueado
+    """
     title = "Email List By Domain"
     model = Email  # el queryset debe retornar los usuarios de emails
     paginate_by = 10
@@ -108,6 +122,8 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
     companies = None
     domains = None
     template_name = 'sys_users/emails.html'
+    email_form = EmailForm
+
 
     def get_queryset(self):
         user = self.request.user.domainadmin
@@ -159,6 +175,7 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
         context['companies'] = self.companies
         context['domains'] = self.domains
         context['emails'] = self.get_queryset  # Alias para los emails
+        #context['current_domain'] = self.domains.get(id=self.kwargs['domain_id'])
         return context
 
 class RemoveEmail(LoginRequiredMixin, DeleteView):

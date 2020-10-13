@@ -2,6 +2,7 @@ from django import forms
 from django.forms.fields import EmailInput
 from .models import User, Domain
 
+
 class UserForm(forms.ModelForm):
 
     class Meta:
@@ -15,7 +16,12 @@ class UserForm(forms.ModelForm):
             }),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': "E-Mail"}),
             'domain': forms.Select(attrs={'class': 'custom-select'}),
-            'quota': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Quota'})
+            'quota': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Quota',
+                'min': "1",
+                'max': "1000",
+            })
         }
 
     def __init__(self, *args, **kwargs):
