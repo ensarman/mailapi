@@ -47,11 +47,12 @@ class CompanyView(LoginRequiredMixin, ListView):
         context = super().get_context_data(*args, **kwargs)
         context['title'] = self.title
         try:
-            context['company'] = Company.objects.get(id=self.kwargs['company_id'])
+            context['company'] = Company.objects.get(
+                id=self.kwargs['company_id'])
             context['domain_form'] = self.domain_form
             context['user_form'] = self.user_form
             context['sys_user'] = DomainAdmin
-        except KeyError as e:
+        except KeyError:
             context['company'] = "---"
 
         return context
@@ -63,7 +64,8 @@ class CompanyView(LoginRequiredMixin, ListView):
             form = DomainForm(self.request.POST)
             if form.is_valid():
                 domain = form.save()
-                company = Company.objects.get(id=self.request.POST.get('company_id'))
+                company = Company.objects.get(
+                    id=self.request.POST.get('company_id'))
                 company.domain.add(domain)
                 return redirect('sys_users:company', self.request.POST.get('company_id'))
             else:
@@ -77,7 +79,8 @@ class CompanyView(LoginRequiredMixin, ListView):
             form = CreateUserForm(self.request.POST)
             if form.is_valid():
                 user = form.save()
-                company = Company.objects.get(id=self.request.POST.get('company_id'))
+                company = Company.objects.get(
+                    id=self.request.POST.get('company_id'))
                 sys_user = DomainAdmin.objects.create(user=user)
                 sys_user.company.add(company)
                 return redirect('sys_users:company', self.request.POST.get('company_id'))
@@ -124,7 +127,6 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
     template_name = 'sys_users/emails.html'
     email_form = EmailForm
 
-
     def get_queryset(self):
         user = self.request.user.domainadmin
         self.companies = user.company.all()
@@ -133,9 +135,11 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             """ Todos los dominios de la compañía seleccionada """
             if self.kwargs.get('domain_id'):
                 """si es que hay domain_id en la url"""
-                self.domains = self.companies.get(id=self.kwargs.get('company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
+                self.domains = self.companies.get(id=self.kwargs.get(
+                    'company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
             else:
-                self.domains = user.company.all().get(id=self.kwargs.get('company_id')).domain.all()
+                self.domains = user.company.all().get(
+                    id=self.kwargs.get('company_id')).domain.all()
             emails = Email.objects.none()
             for domain in self.domains:
                 emails = emails | domain.user_set.all()
@@ -147,7 +151,7 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             for domain in self.domains:
                 emails = emails | domain.user_set.all()
         else:
-            """cuando no hay ni company_id 
+            """cuando no hay ni company_id
             ni solo tiene una compañia
             tiene que devolver todos los dominios del usuario
             """
@@ -158,7 +162,8 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
 
             if self.kwargs.get('domain_id'):
                 """esto esta muy hardcoded, hay que suavsarlo un poco"""
-                self.domains = self.domains.filter(id=self.kwargs.get('domain_id'))
+                self.domains = self.domains.filter(
+                    id=self.kwargs.get('domain_id'))
 
             emails = Email.objects.none()
             for domain in self.domains:
@@ -166,17 +171,20 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
 
         # configurando el filtro para la búsqueda
         if self.request.GET.get('email'):
-            emails = emails.filter(email__icontains=self.request.GET.get('email'))
+            emails = emails.filter(
+                email__icontains=self.request.GET.get('email'))
 
         return emails.order_by('domain')
 
     def get_context_data(self, *args, **kwargs):
-        context = super(ListEmailByDomain, self).get_context_data(*args, **kwargs)
+        context = super(ListEmailByDomain, self).get_context_data(
+            *args, **kwargs)
         context['companies'] = self.companies
         context['domains'] = self.domains
         context['emails'] = self.get_queryset  # Alias para los emails
-        #context['current_domain'] = self.domains.get(id=self.kwargs['domain_id'])
+        # context['current_domain'] = self.domains.get(id=self.kwargs['domain_id'])
         return context
+
 
 class RemoveEmail(LoginRequiredMixin, DeleteView):
     model = Email
@@ -186,4 +194,3 @@ class RemoveEmail(LoginRequiredMixin, DeleteView):
             'company_id': self.kwargs.get('company_id'),
             'domain_id': self.kwargs.get('domain_id')
         })
-

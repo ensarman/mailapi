@@ -51,18 +51,20 @@ class BaseList(LoginRequiredMixin, ListView, FormMixin):
         context['form'] = form
         return self.render_to_response(context=context)
 
+
 def user_detail_json(request, pk):
     email = Email.objects.get(id=pk)
 
-    dict ={
+    dict = {
         'email': email.email,
         'domain': email.email.__str__(),
         'quota': email.quota,
     }
-    #dict = model_to_dict(user)
-    #del dict['password']
+    # dict = model_to_dict(user)
+    # del dict['password']
 
     return HttpResponse(json.dumps(dict), content_type='application/json')
+
 
 class CreateEmail(LoginRequiredMixin, CreateView):
     model = Email
