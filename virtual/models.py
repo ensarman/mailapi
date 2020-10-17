@@ -14,9 +14,8 @@ Los nombres de las tablas están en plural por el estandar de ISPmail
 
 class Domain(models.Model):
     """Dominos virtuales"""
-    name = models.TextField(
-        max_length=50,
-        unique=True,
+    name = models.CharField(
+        max_length=50, unique=True,
         validators=(
             RegexValidator(
                 regex=r'^[a-zA-Z0-9-]*\.[a-z]*$',
@@ -30,6 +29,9 @@ class Domain(models.Model):
     def __str__(self):
         return self.name
 
+    def get_companies(self):  # este es para el admin
+        return '\n'.join(company.name for company in self.company_set.all())
+
 
 class User(models.Model):
     """Usuarios del correo electronico"""
@@ -38,6 +40,7 @@ class User(models.Model):
     password = models.CharField(
         max_length=100, blank=True, null=False, default=None)
     quota = models.PositiveBigIntegerField(default=1)
+    used_quota = models.PositiveBigIntegerField(null=True)
 
     __previous_password = None
     __byte_to_gigabyte_factor = 1073741824
@@ -53,7 +56,7 @@ class User(models.Model):
         return self.email
 
     def quota_gb(self):
-        return self.quota/self.__byte_to_gigabyte_factor
+        return self.quota / self.__byte_to_gigabyte_factor
 
     def save(self, *args, **kwargs):
         if not self.id:
