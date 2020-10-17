@@ -14,8 +14,10 @@ from .forms import CreateUserForm
 from virtual.forms import DomainForm, UserForm as EmailForm
 from virtual.models import Domain, User as Email
 
+from imaplib import IMAP4_SSL
 
 # Create your views here.
+
 
 class LoginView(LoginView):
     """
@@ -23,8 +25,14 @@ class LoginView(LoginView):
     """
     template_name = "sys_users/login.html"
     redirect_authenticated_user = True
-    success_url = reverse_lazy("mail:user_list")
+    # success_url = reverse_lazy("mail:user_list")
     title = "Login Email Magnament"
+
+    def get_success_url(self):
+        if self.request.user.is_staff:
+            return reverse_lazy("home")
+        else:
+            return reverse_lazy("sys_users:email_by_domain")
 
 
 class sysUsers(LoginRequiredMixin, ListView):
