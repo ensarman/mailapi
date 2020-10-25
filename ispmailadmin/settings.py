@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from ispmailadmin.secret import SECRET_KEY, DATABASES
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,13 +21,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '%empt==-&ww@+6rz!&d@hg1&x&)&t$8i=p8smukftnbm+6#j$v'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 DEBUG = False if os.environ.get('DJANGO_DEPLOY') == "1" else True
 
 ALLOWED_HOSTS = []
+
+#SECRET_KEY = SECRET_KEY
 
 
 # Application definition
@@ -80,17 +83,7 @@ WSGI_APPLICATION = 'ispmailadmin.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'unix_socket': '/var/run/mysqld//var/run/mysqld.sock',
-        'NAME': 'mailserver',
-        # 'USERNAME': 'kike',
-        # 'PASSWORD': 'mysql',
-    }
-}
-
+#DATABASES = DATABASES
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

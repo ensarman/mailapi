@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 flake8 = "*"
+ipython = "*"
 
 [packages]
 django = {version = '>3.0,<4.0'}
