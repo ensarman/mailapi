@@ -18,3 +18,11 @@ DATABASES = {
     } 
 }
 ```
+## if your tables from ispmail already exists
+
+you must fake some migrations then migrate all next migrations
+
+```bash
+$python manage.py migrate virtual 0003 --fake
+$python manage.py migrate
+```
