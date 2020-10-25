@@ -4,4 +4,4 @@
 __pycache__/
 *.py[cod]
 Pipfile.lock
-mailadmin/secret.py
+ispmailadmin/secret.py
