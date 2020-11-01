@@ -84,7 +84,7 @@ class DoveAdmHTTPClient(object):
         else:
             return "Not an error"
 
-    def get_quota_value(self, user, key, key_type='STORAGE'):
+    def get_quota(self, user, key=None, key_type='STORAGE'):
         """gets any quota value from the given key and type
 
         Args:
@@ -94,6 +94,7 @@ class DoveAdmHTTPClient(object):
 
         Returns:
             str: the spected value or an error description
+            dict: all user quota data if no key is specified
         """
 
         keys = ['value', 'limit', 'percent']
@@ -110,10 +111,16 @@ class DoveAdmHTTPClient(object):
                 if self.is_error(response):
                     return self.parse_error(response)
                 else:
-                    if key in keys and key_type in types:
-                        return response.json()[0][1][types.get(key_type)][key]
+                    if key:
+                        if key in keys and key_type in types:
+                            return response.json()[0][1][types.get(key_type)][key]
+                        else:
+                            return 'invalid key or type'
                     else:
-                        return 'invalid key or type'
+                        if key_type in types:
+                            return response.json()[0][1][types.get(key_type)]
+                        else:
+                            return 'invalid type'
             else:
                 return f"Status Code not 200: {response.status_code}"
 
