@@ -71,7 +71,7 @@ class DoveAdmHTTPClient(object):
             return [["error", {"type": "fatalError"}, self.sufix]]
 
     def is_error(self, response):
-        return response[0][0] == 'error'
+        return response.json()[0][0] == 'error'
 
     def parse_error(self, response):
         """get the error description from the dovecot response error exitCode"""
@@ -88,8 +88,8 @@ class DoveAdmHTTPClient(object):
         """gets any quota value from the given key and type
 
         Args:
-            user ([type]): an username on the mail database
-            key ([type]): ['value', 'limit', 'percent']
+            user (str): an username on the mail database
+            key (str, optional): ['value', 'limit', 'percent']
             key_type (str, optional): 'STORAGE', 'MESSAGE'. Defaults to 'STORAGE'.
 
         Returns:

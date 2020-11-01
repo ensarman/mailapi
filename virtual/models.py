@@ -1,6 +1,8 @@
 from django.db import models
 from .lib import password
 from django.core.validators import RegexValidator
+from dovehttp.DoveAdmHTTPClient import DoveAdmHTTPClient
+from django.conf import settings
 
 # Create your models here.
 
@@ -40,10 +42,10 @@ class User(models.Model):
     password = models.CharField(
         max_length=100, blank=True, null=False, default=None)
     quota = models.PositiveBigIntegerField(default=1)
-    used_quota = models.PositiveBigIntegerField(null=True)
 
     __previous_password = None
     __byte_to_gigabyte_factor = 1073741824
+    __dovehttp = None
 
     class Meta:
         db_table = 'virtual_users'
@@ -51,6 +53,15 @@ class User(models.Model):
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
         self.__previous_password = self.password
+        self.__dovehttp = DoveAdmHTTPClient(
+            apiurl=settings.DOVECOT_HTTP['url'],
+            user=settings.DOVECOT_HTTP['user'],
+            password=settings.DOVECOT_HTTP['password'],
+        )
+        if self.id:
+            storage_quota = self.__dovehttp.get_quota(user=self.email)
+            self.quota_used = storage_quota['value']
+            self.quota_percent = storage_quota['percent']
 
     def __str__(self):
         return self.email
@@ -77,10 +88,6 @@ class User(models.Model):
                 self.password = password.crypt_pass(self.password)
         self.quota *= self.__byte_to_gigabyte_factor
         super(User, self).save(*args, **kwargs)
-
-    def quota_used(self):
-        """Obtener la cuota del usuario via IMAP"""
-        pass
 
 
 class Alias(models.Model):
