@@ -16,6 +16,7 @@ django-graphql-jwt = "*"
 django-cors-headers = "*"
 passlib = "*"
 bcrypt = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

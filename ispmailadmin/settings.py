@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-from ispmailadmin.secret import SECRET_KEY, DATABASES
+from ispmailadmin.secret import SECRET_KEY, DATABASES, DOVECOT_HTTP
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,9 +28,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = False if os.environ.get('DJANGO_DEPLOY') == "1" else True
 
 ALLOWED_HOSTS = []
-
-#SECRET_KEY = SECRET_KEY
-
 
 # Application definition
 
@@ -79,11 +76,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ispmailadmin.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-#DATABASES = DATABASES
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -118,6 +113,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
+
 
 LANGUAGE_CODE = 'en-us'
 
