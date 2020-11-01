@@ -84,7 +84,7 @@ class DoveAdmHTTPClient(object):
         else:
             return "Not an error"
 
-    def get_quota(self, user, key, key_type='STORAGE'):
+    def get_quota_value(self, user, key, key_type='STORAGE'):
         """gets any quota value from the given key and type
 
         Args:

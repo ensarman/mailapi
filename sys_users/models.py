@@ -12,7 +12,7 @@ class Company(models.Model):
         max_length=11, unique=True,
         validators=(
             RegexValidator(
-                regex=r'^[0-9]$',
+                regex=r'^[0-9]*$',
                 message="Enter a valid ID number it must be only numbers"
             ),)
     )
