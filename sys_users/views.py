@@ -8,13 +8,12 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.db import transaction
+from django.views.generic.edit import CreateView
 
 from .models import Company, DomainAdmin
-from .forms import CreateUserForm
+from .forms import CompanyForm, CreateUserForm
 from virtual.forms import DomainForm, UserForm as EmailForm
 from virtual.models import Domain, User as Email
-
-from imaplib import IMAP4_SSL
 
 # Create your views here.
 
@@ -48,12 +47,14 @@ class CompanyView(LoginRequiredMixin, ListView):
     ordering = '-id'
     paginate_by = 5
     title = "Email Magnament"
+    company_form = CompanyForm
     domain_form = DomainForm
     user_form = CreateUserForm
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['title'] = self.title
+        context['company_form'] = self.company_form
         try:
             context['company'] = Company.objects.get(
                 id=self.kwargs['company_id'])
@@ -82,7 +83,7 @@ class CompanyView(LoginRequiredMixin, ListView):
                 context['domain_form'] = form
                 return self.render_to_response(context)
 
-        if self.request.POST.get('form') == 'user':
+        elif self.request.POST.get('form') == 'user':
             """si el formulario es del usuarios"""
             form = CreateUserForm(self.request.POST)
             if form.is_valid():
@@ -96,6 +97,21 @@ class CompanyView(LoginRequiredMixin, ListView):
                 self.object_list = self.get_queryset()
                 context = self.get_context_data()
                 context['user_form'] = form
+                return self.render_to_response(context)
+        elif self.request.POST.get('form') == 'company':
+            """ si es que se ejecuta crear nueva comañia """
+            form = CompanyForm(self.request.POST)
+            if form.is_valid():
+                company = form.save()
+                if self.kwargs.get('company_id', False):
+                    return redirect('sys_users:company', self.kwargs.get('company_id'))
+                else:
+                    return redirect('sys_users:company')
+
+            else:
+                self.object_list = self.get_queryset()
+                context = self.get_context_data()
+                context['company_form'] = form
                 return self.render_to_response(context)
 
 
@@ -141,13 +157,16 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
 
         if self.kwargs.get('company_id'):
             """ Todos los dominios de la compañía seleccionada """
-            if self.kwargs.get('domain_id'):
-                """si es que hay domain_id en la url"""
-                self.domains = self.companies.get(id=self.kwargs.get(
-                    'company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
-            else:
-                self.domains = user.company.all().get(
-                    id=self.kwargs.get('company_id')).domain.all()
+            # if self.kwargs.get('domain_id'):
+            #     """si es que hay domain_id en la url"""
+
+            # self.domains = self.companies.get(id=self.kwargs.get(
+            #     'company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
+            # else:
+            #     self.domains = user.company.all().get(
+            #         id=self.kwargs.get('company_id')).domain.all()
+            self.domains = user.company.all().get(
+                id=self.kwargs.get('company_id')).domain.all()
             emails = Email.objects.none()
             for domain in self.domains:
                 emails = emails | domain.user_set.all()
@@ -163,7 +182,6 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             ni solo tiene una compañia
             tiene que devolver todos los dominios del usuario
             """
-
             self.domains = Domain.objects.none()
             for company in self.companies:  # crear queryset de todos los dominios
                 self.domains = self.domains | company.domain.all()
@@ -185,12 +203,16 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
         return emails.order_by('domain')
 
     def get_context_data(self, *args, **kwargs):
+        current_domain = ""
+        if self.kwargs.get('domain_id'):
+            current_domain = self.domains.get(id=self.kwargs['domain_id'])
+
         context = super(ListEmailByDomain, self).get_context_data(
             *args, **kwargs)
         context['companies'] = self.companies
         context['domains'] = self.domains
         context['emails'] = self.get_queryset  # Alias para los emails
-        # context['current_domain'] = self.domains.get(id=self.kwargs['domain_id'])
+        context['current_domain'] = current_domain
         return context
 
 
@@ -202,3 +224,13 @@ class RemoveEmail(LoginRequiredMixin, DeleteView):
             'company_id': self.kwargs.get('company_id'),
             'domain_id': self.kwargs.get('domain_id')
         })
+
+
+# class AddEmail(LoginRequiredMixin, CreateView):
+#     model = Email
+
+#     def get_success_url(self):
+#         return reverse_lazy('sys_users:email_by_domain', kwargs={
+#             'company_id': self.kwargs.get('company_id'),
+#             'domain_id': self.kwargs.get('domain_id')
+#         })

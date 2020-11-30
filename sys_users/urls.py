@@ -11,6 +11,7 @@ from .views import (
 )
 from virtual.models import User as Email
 
+
 urlpatterns = [
     path('login/', LoginView.as_view(), name="login"),
     path('logout/', LogoutView.as_view(), name="logout"),

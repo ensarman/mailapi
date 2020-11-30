@@ -34,5 +34,5 @@ class DomainForm(forms.ModelForm):
         model = Domain
         fields = {'name'}
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dominio'})
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Domain'})
         }

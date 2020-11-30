@@ -1,5 +1,6 @@
 {% extends 'main.html' %}
 {% load static %}
+{% load conversion_tags %}
 
 {% block body %}
   <div class="container">
@@ -22,14 +23,18 @@
       <div class="col-12 col-lg-3">
         <div class="list-group">
           {% for domain in domains %}
-            <a
+            <a 
             {% if view.kwargs.company_id %}
               href="{% url 'sys_users:email_by_domain' view.kwargs.company_id domain.id %}"
             {% else %}
-
               href="{% url 'sys_users:email_by_domain' '0' domain.id %}"
             {% endif %}
+              
+            {% if domain.id == view.kwargs.domain_id %}
+              class="list-group-item list-group-item-action bg-dark text-light"
+            {% else %}
               class="list-group-item list-group-item-action"
+            {% endif %}
             >
               {{ domain }}
             </a>
@@ -48,18 +53,32 @@
               </a>
             </th>
             <th>Domain</th>
-            <th>Quota</th>
+            <th>Quota Assigned</th>
             <th>Quota Used</th>
             <th><span>actions</span></th>
-            <th><a href="#" class="" data-toggle="modal" data-target="#NewEmailModal"><i class="fas fa-plus-square"></i></a></th>
+            <th>
+              <a
+                href="#" 
+            {% if view.kwargs.domain_id %}
+                id="btn_new_email"
+            {% else %}
+                class="text-danger"
+                data-toggle="tooltip" data-placement="left" 
+                title="select a domain first"
+            {% endif %}
+              ><i class="fas fa-plus-square"></i></a>
+            </th>
           </thead>
           <tbody class="small">
             {% for email in object_list %}
               <tr>
                 <th>{{ email }}</th>
                 <td>{{ email.domain }}</td>
-                <td>{{ email.quota }}</td>
-                <td>--</td>
+                <td>{{ email.quota | btogb:True }}</td>
+                <td class="small">
+                  {{ email.quota_used | btogb}}GB <br>
+                  {{ email.quota_percent}}%
+                </td>
                 <td colspan="2">
                   <button
                       class="btn btn-outline-primary"
@@ -91,39 +110,45 @@
 
   <!-- Modal -->
   <div class="modal fade" id="NewEmailModal" tabindex="-1" role="dialog" aria-labelledby="NewEmailModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="NewEmailModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="NewEmailModalLabel">New Email</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form action="">
+        <form action="{% url 'virtual:create_email'%}" method="post" >
+        {% csrf_token %}
           <div class="container-fluid">
               <div class="modal-body">
                 <input type="hidden" name="domain" value="{{ current_domain.id }}">
                 <div class="row mb-3">
-                    <div class="col-3">
+                    <div class="col-2">
                       <label for="{{ view.email_form.email.auto_id }}">Email:</label>
                     </div>
-                    <div class="col-9">
+                    <div class="col-10">
                       {{ view.email_form.email }}
                     </div>
                 </div>
                 <div class="row mb-3">
-                  <div class="col-3">
+                  <div class="col-2">
                     <label for="{{ view.email_form.password.auto_id }}">Password:</label>
                   </div>
-                  <div class="col-9">
+                  <div class="col-8">
                     {{ view.email_form.password }}
+                    <input type="checkbox" name="show_password" id="check_show_password">
+                    Show password 
+                  </div>
+                  <div class="col-2">
+                    <button type="button" class="btn btn-block btn-info" id="btn_gen_password">Generate Password</button>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-3">
+                  <div class="col-2">
                     <label for="{{ view.email_form.quota.auto_id }}">Quota:</label>
                   </div>
-                  <div class="col-9">
+                  <div class="col-10">
                     {{ view.email_form.quota }}
                   </div>
                 </div>
@@ -131,7 +156,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
           </div>
         </form>
       </div>
@@ -143,7 +168,15 @@
 {% block js %}
   <script src="{% static 'js/delete_modal.js' %}"></script>
   <script src="{% static 'js/search.js' %}"></script>
+  <script src="{% static 'js/pwgen.js' %}"></script>
+  
   <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+  <script>
+    
     const edit_email = (id, url, csrf_token) => {
       $('.modal').remove();
 
@@ -198,6 +231,14 @@
 
     };
 
+    
+  </script>
+  <script>
+    // open the modal and execute some things 
+    btn_new_email.onclick = () => {
+      check_show_password.checked = false;
+      $('#NewEmailModal').modal('show');
+    };
     // arregla el email le coloca el dominio correspondiente
     document.getElementById('{{ view.email_form.email.auto_id }}').addEventListener('change', e => {
       const domain = "{{ current_domain.name }}";
@@ -209,5 +250,19 @@
         e.target.value = `${address}@${domain}`;
       }
     });
+    check_show_password.onclick = (event) => {
+      //let password_input = document.getElementById('{{ view.email_form.password.auto_id }}')
+      if ({{ view.email_form.password.auto_id }}.type === "password"){
+        {{ view.email_form.password.auto_id }}.type = "text";
+      }
+      else {
+        {{ view.email_form.password.auto_id }}.type = "password";
+      }
+    };
+    btn_gen_password.onclick = () => {
+      {{ view.email_form.password.auto_id }}.value = pwgen(15);
+      {{ view.email_form.password.auto_id }}.type = "text";
+      check_show_password.checked = true;
+    }
   </script>
 {% endblock %}

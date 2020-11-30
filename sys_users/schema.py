@@ -6,16 +6,21 @@ from graphene_django import DjangoObjectType
 from .models import DomainAdmin, Company
 from django.db import transaction
 
+
 class SysUserType(DjangoObjectType):
     class Meta:
         model = get_user_model()
 
+
 class DomainAdminType(DjangoObjectType):
     class Meta:
         model = DomainAdmin
+
+
 class BusinessType(DomainAdminType):
     class Meta:
         model = Company
+
 
 class CreateSysUser(graphene.Mutation):
     user = graphene.Field(SysUserType)
@@ -34,6 +39,7 @@ class CreateSysUser(graphene.Mutation):
         user.save()
 
         return CreateSysUser(user=user)
+
 
 class CreateDomainAdmin(graphene.Mutation):
     domain_admin = graphene.Field(DomainAdminType)
@@ -88,6 +94,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_business(self, info, **kwargs):
         return Company.objects.all()
+
 
 class Mutation(graphene.ObjectType):
     create_sys_user = CreateSysUser.Field()

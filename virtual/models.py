@@ -1,7 +1,7 @@
 from django.db import models
-from .lib import password
+from lib import password
 from django.core.validators import RegexValidator
-from dovehttp.DoveAdmHTTPClient import DoveAdmHTTPClient
+from lib.DoveAdmHTTPClient import DoveAdmHTTPClient
 from django.conf import settings
 
 # Create your models here.
@@ -59,9 +59,10 @@ class User(models.Model):
             password=settings.DOVECOT_HTTP['password'],
         )
         if self.id:
+            """Only enters here only if the user exists"""
             storage_quota = self.__dovehttp.get_quota(user=self.email)
-            self.quota_used = storage_quota['value']
-            self.quota_percent = storage_quota['percent']
+            self.quota_used = int(storage_quota['value'])
+            self.quota_percent = int(storage_quota['percent'])
 
     def __str__(self):
         return self.email

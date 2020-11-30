@@ -1,5 +1,6 @@
 {% extends 'main.html' %}
 {% load static %}
+{% load conversion_tags %}
 {% block head %}
   <link rel="stylesheet" href="{% static 'bootstrap-select/bootstrap-select.min.css' %}">
 {% endblock %}
@@ -14,7 +15,7 @@
         </div>
         <div class="row">
           <div class="col-md-3">
-            <button type="button" class="btn btn-primary" id="btn_new_company">
+            <button type="button" class="btn btn-primary" id="new-company-btn">
               New company             
             </button>
           </div>
@@ -22,12 +23,53 @@
             {% include 'pagination.html' %}
           </div>
         </div>
+        <form class="row my-3 {{ company_form.errors|yesno:",d-none," }}" id="new-company-form" action="" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="form" value="company">
+          <div class="col-12 small">
+            {% if company_form.errors %}
+            <div class="row">
+              <div class="col-md-3">
+                {% for error in company_form.name.errors %}
+                <p class="text-danger">{{error}}</p>
+                {% endfor %}
+              </div>
+              <div class="col-md-3">
+                {% for error in company_form.id_number.errors %}
+                <p class="text-danger">{{error}}</p>
+                {% endfor %}
+              </div>
+              <div class="col-md-3">
+                {% for error in company_form.quota_total.errors %}
+                <p class="text-danger">{{error}}</p>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            <div class="row">
+              <div class="col-md-3">
+                {{ company_form.name  }}
+              </div>
+              <div class="col-md-3">
+                {{ company_form.id_number  }}
+              </div>
+              <div class="col-md-3">
+                {{ company_form.quota_total  }}
+              </div>
+              <div class="col-md-3 text-center">
+                <button class="btn btn-success" type="submit">Create New Company</button>
+              </div>
+            </div>
+          </div>
+        </form>
         <table class="table table-hover table-sm">
           <thead class="thead-dark">
           <th>Company</th>
           <th>Company ID</th>
           <th>Domains</th>
           <th>Users</th>
+          <th>Quota</th>
+          <th>Asigned Quota</th>
           <th>Actions</th>
           </thead>
           {% for company in object_list %}
@@ -43,6 +85,12 @@
                 {% for domainadmin in company.domainadmin_set.all %}
                   {{ domainadmin.user.username }} <br/>
                 {% endfor %}
+              </td>
+              <td>{{ company.quota_total | btogb:True }}</td>
+              <td class="small" >
+                {{ company.get_assigned_quota | btogb | floatformat:2 }} GB
+                <br>
+                {{ company.get_percnet_assigned_quota }}%
               </td>
               <td class="align-middle text-center">
                 <a href="{% url 'sys_users:company' company.id %}" class="btn btn-outline-info"><i
@@ -102,8 +150,8 @@
                       {{ domain_form.name }}
                     </div>
                     <div class="col-2">
-                      <button class="btn btn-outline-primary" type="submit">
-                        <i class="fas fa-plus"></i>
+                      <button class="btn btn-outline-success" type="submit">
+                        <i class="fas fa-check"></i>
                       </button>
                     </div>
                   </div>
@@ -118,6 +166,7 @@
                 </thead>
                 <tbody>
                 {% for domain in company.domain.all %}
+                
                   <tr>
                     <td>{{ domain }}</td>
                     <td class="text-center">
@@ -200,18 +249,24 @@
 {% endblock %}
 
 {% block js %}
-  {% if request.resolver_match.kwargs.company_id %}
   <script>
-    const toggle_block = (button, block) => {
+  const toggle_block = (button, block) => {
       button.addEventListener("click", () => {
         block.classList.toggle('d-none');
         button.classList.toggle('btn-secondary');
         button.classList.toggle('btn-outline-secondary');
       })
     };
-    toggle_block(document.getElementById('new-user-btn'), document.getElementById('new-user-form'));
-    toggle_block(document.getElementById('new-domain-btn'), document.getElementById('new-domain-form'))
+    toggle_block(document.getElementById('new-company-btn'), document.getElementById('new-company-form'))
   </script>
-    <script src="{% static 'js/delete_modal.js' %}"></script>
+  {% if request.resolver_match.kwargs.company_id %}
+  <script>
+    
+    toggle_block(document.getElementById('new-user-btn'), document.getElementById('new-user-form'));
+    toggle_block(document.getElementById('new-domain-btn'), document.getElementById('new-domain-form'));
+    
+  </script>
+  <script src="{% static 'js/delete_modal.js' %}"></script>
   {% endif %}
+  
 {% endblock %}

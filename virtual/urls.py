@@ -1,6 +1,6 @@
 from django.urls import path, reverse, reverse_lazy
 from django.views.generic import DeleteView, CreateView, ListView
-from .views import BaseList, user_detail_json
+from .views import BaseList, user_detail_json, CreateEmail
 from .models import User, Domain, Alias
 from .forms import UserForm, DomainForm
 
@@ -42,5 +42,7 @@ urlpatterns = [
             success_url=reverse_lazy('mail:domain_list'),
         ), name='domain_delete'
     ),
-    path('user_detail_json/<int:pk>', user_detail_json, name="user_detail_json")
+    path('user_detail_json/<int:pk>', user_detail_json, name="user_detail_json"),
+    path('create_email', CreateEmail.as_view(), name='create_email')
+
 ]

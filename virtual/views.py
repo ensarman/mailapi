@@ -14,6 +14,7 @@ import json
 from .models import User as Email, Domain
 from .forms import UserForm as EmailForm
 
+
 # Create your views here.
 
 
@@ -69,9 +70,11 @@ def user_detail_json(request, pk):
 class CreateEmail(LoginRequiredMixin, CreateView):
     model = Email
     form = EmailForm
+    fields = ('email', 'domain', 'password', 'quota')
 
-    def form_valid(self, form):
-        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
-
-    # def get_success_url(self):
+    # def form_valid(self, form):
     #     return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+
+    def get_success_url(self):
+        # return HttpResponseRedirect(self.request.META.get('HTTP_REFERER'))
+        return self.request.META.get('HTTP_REFERER')
