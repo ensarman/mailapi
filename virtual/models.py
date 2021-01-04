@@ -3,6 +3,9 @@ from lib import password
 from django.core.validators import RegexValidator
 from lib.DoveAdmHTTPClient import DoveAdmHTTPClient
 from django.conf import settings
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 
 # Create your models here.
 
@@ -70,6 +73,9 @@ class User(models.Model):
     def quota_gb(self):
         return self.quota / self.__byte_to_gigabyte_factor
 
+    def get_company(self):
+        pass
+
     def save(self, *args, **kwargs):
         if not self.id:
             """si no hay ID es que es un nuevo usuario"""
@@ -87,6 +93,7 @@ class User(models.Model):
             if self.password != self.__previous_password:
                 """significa que ha sido editado"""
                 self.password = password.crypt_pass(self.password)
+
         self.quota *= self.__byte_to_gigabyte_factor
         super(User, self).save(*args, **kwargs)
 

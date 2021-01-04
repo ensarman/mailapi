@@ -1,63 +1,72 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-  <a href="#" class="navbar-brand">MailManager</a>
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-toggle="collapse"
-    data-target="#navbarSupportedContent"
-    aria-controls="navbarSupportedContent"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <div class="container-fluid">
+    <a href="#" class="navbar-brand">MailManager</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item dropdown">
-        <a
-          class="nav-link dropdown-toggle"
-          href="#"
-          id="magnamentDropdown"
-          role="button"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-        >
-          Email Magnament
-        </a>
-        <div class="dropdown-menu" aria-labelledby="magnamentDropdown">
-          {% if user.is_staff %}
-          <a class="dropdown-item" href="{% url 'mail:domain_list' %}"
-            >global domains</a
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="magnamentDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
           >
-          <a class="dropdown-item" href="{% url 'mail:user_list' %}"
-            >global users</a
+            Email Magnament
+          </a>
+          <div class="dropdown-menu" aria-labelledby="magnamentDropdown">
+            {% if user.is_staff %}
+            <a class="dropdown-item" href="{% url 'mail:domain_list' %}"
+              >global domains</a
+            >
+            <a class="dropdown-item" href="{% url 'mail:user_list' %}"
+              >global users</a
+            >
+            <a class="dropdown-item" href="">global redirections</a>
+            <a class="dropdown-item" href="">global aliases</a>
+            {% else %}
+              {% for company in user.domainadmin.company.all %}
+                <a 
+                  class="dropdown-item" 
+                  href="{% url 'sys_users:email_by_domain' company.id %}"
+                >
+                {{ company.name }}
+                </a>
+              {% endfor %}
+            {% block navbar %}
+            {% endblock %} 
+            {% endif %}
+          </div>
+        </li>
+        {% if user.is_staff %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'sys_users:company' %}"
+            >Companies Magnament</a
           >
-          <a class="dropdown-item" href="">global redirections</a>
-          <a class="dropdown-item" href="">global aliases</a>
-          {% else %}
-          <a class="dropdown-item" href="{% url 'sys_users:email_by_domain' %}"
-            >Email</a
-          >
-          {% block navbar %} {% endblock %} {% endif %}
-        </div>
-      </li>
-      {% if user.is_staff %}
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'sys_users:company' %}"
-          >Companies Magnament</a
-        >
-      </li>
-      {% endif %}
-    </ul>
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <span class="nav-link">USER: {{ user.get_username }}</span>
-      </li>
-      <li class="nav-item">
-        <a href="{% url 'sys_users:logout' %}" class="nav-link">Logout</a>
-      </li>
-    </ul>
+        </li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <span class="nav-link">USER: {{ user.get_username }}</span>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'sys_users:logout' %}" class="nav-link">Logout</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>

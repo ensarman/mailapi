@@ -38,7 +38,7 @@ class Company(models.Model):
     def get_domains(self):  # este es para el admin
         return '\n'.join([domain.name for domain in self.domain.all()])
 
-    def get_assigned_quota(self):
+    def get_used_quota(self):
         """returns quota used by the domain
 
         Returns:
@@ -51,17 +51,14 @@ class Company(models.Model):
         return self.all_quota
 
     def get_percnet_assigned_quota(self):
-        if not self.all_quota:
-            self.get_assigned_quota()
-
-        return (self.all_quota / self.quota_total) * 100
+        return (self.get_used_quota() / self.quota_total) * 100
 
     def is_full(self):
         """
         Returns:
             bool: true if there is no more space
         """
-        return self.quota_total >= self.all_quota
+        return self.get_used_quota() >= self.quota_total
 
 
 class DomainAdmin(models.Model):

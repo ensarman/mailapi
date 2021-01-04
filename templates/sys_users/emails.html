@@ -2,6 +2,10 @@
 {% load static %}
 {% load conversion_tags %}
 
+{% block head %}
+  <title>Users by domain</title>
+{% endblock %}
+
 {% block body %}
   <div class="container">
     <div class="row">
@@ -14,6 +18,9 @@
             >
               {{ company.name }}
             </a>
+            <span class="list-group-item">
+              {{ company.get_percnet_assigned_quota }}%
+            </span>
           {% endfor %}
         </div>
       </div>
@@ -45,7 +52,7 @@
       {% include 'pagination.html' %}
         <form action="" method="get">
         <table class="table table-sm table-hover">
-          <thead class="thead-dark">
+          <thead class="thead-dark align-middle">
             <th id="email">
               <span>Email</span>
               <a href="#" class="search-button">
@@ -57,16 +64,22 @@
             <th>Quota Used</th>
             <th><span>actions</span></th>
             <th>
-              <a
-                href="#" 
+              <button
+                type="button" 
             {% if view.kwargs.domain_id %}
                 id="btn_new_email"
+                class="btn btn-outline-primary"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top" 
+                title="Add a new Email"
             {% else %}
-                class="text-danger"
-                data-toggle="tooltip" data-placement="left" 
-                title="select a domain first"
+                class="btn btn-secondary"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top" 
+                title="Select a domain first"
             {% endif %}
-              ><i class="fas fa-plus-square"></i></a>
+              ><i class="fas fa-plus"></i>
+              </button>
             </th>
           </thead>
           <tbody class="small">
@@ -107,18 +120,17 @@
     </div>
     {% endif %}
   </div>
-
+  
+  {% if view.kwargs.domain_id %}
   <!-- Modal -->
-  <div class="modal fade" id="NewEmailModal" tabindex="-1" role="dialog" aria-labelledby="NewEmailModalLabel" aria-hidden="true">
+  <div class="modal fade" id="NewEmailModal" tabindex="-1" aria-labelledby="NewEmailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="NewEmailModalLabel">New Email</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="{% url 'virtual:create_email'%}" method="post" >
+        <form id="new_email_form" action="{% url 'sys_users:add_email' view.kwargs.company_id current_domain.id %}" method="post" >
         {% csrf_token %}
           <div class="container-fluid">
               <div class="modal-body">
@@ -155,91 +167,23 @@
               </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button id="btn_save_new_mail" type="button" class="btn btn-primary">Save changes</button>
           </div>
         </form>
       </div>
     </div>
   </div>
-
-{% endblock %}
-
-{% block js %}
-  <script src="{% static 'js/delete_modal.js' %}"></script>
-  <script src="{% static 'js/search.js' %}"></script>
-  <script src="{% static 'js/pwgen.js' %}"></script>
-  
-  <script>
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
-  </script>
-  <script>
-    
-    const edit_email = (id, url, csrf_token) => {
-      $('.modal').remove();
-
-      let email = null;
-      let quota = null;
-      let password = null;
-
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            email = data.email;
-            quota = data.quota;
-            password = data.password;
-        });
-
-      const modal = document.createElement('div');
-      modal.setAttribute('id', `modal-${id}`);
-      modal.setAttribute('tabindex', '-1');
-      modal.setAttribute('role', 'dialog');
-      modal.setAttribute('aria-labelledby', "ModalLabel");
-      modal.setAttribute('aria-hidden', "true");
-      modal.classList.add("modal", "fade");
-
-      modal.innerHTML = `
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="ModalLabel">Editing ${email}</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <form method="post" action="${url}">
-
-              <div class="modal-body">
-                <input type="text" type="pasword" name="password" value="">
-                <input type="text" name="password" value="">
-              </div>
-              <div class="modal-footer">
-                  <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
-                  <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
-                  <button type="submit" class="btn btn-outline-primary">Delete</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      `.trim();
-
-      $(modal).on('hidden.bs.modal', function () {
-                $(this).remove();
-            }).modal('show');
-
-    };
-
-    
-  </script>
   <script>
     // open the modal and execute some things 
+    const new_mail_modal = document.querySelector('#NewEmailModal');
+    const check_show_password = new_mail_modal.querySelector('#check_show_password');
     btn_new_email.onclick = () => {
       check_show_password.checked = false;
-      $('#NewEmailModal').modal('show');
+      const modal_bootstrap = new  bootstrap.Modal(new_mail_modal);
+      modal_bootstrap.show();
     };
-    // arregla el email le coloca el dominio correspondiente
+    // fixes the email putting the corresponding domain
     document.getElementById('{{ view.email_form.email.auto_id }}').addEventListener('change', e => {
       const domain = "{{ current_domain.name }}";
       const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -263,6 +207,105 @@
       {{ view.email_form.password.auto_id }}.value = pwgen(15);
       {{ view.email_form.password.auto_id }}.type = "text";
       check_show_password.checked = true;
-    }
+    };
+    btn_save_new_mail.onclick = () => {
+      let form_data = new FormData(new_email_form);
+      fetch(new_email_form.action, {method: 'POST', body: form_data})
+      .then(response=>response.json())
+      .then(data=>{
+        console.log(data);
+        if (data.status == 'success'){
+          window.location.reload(false);
+        }
+        else {
+          alert(`Error: ${data.comment}`)
+        }
+      })
+    };
   </script>
+
+  {% endif %}
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/delete_modal.js' %}"></script>
+  <script src="{% static 'js/search.js' %}"></script>
+  <script src="{% static 'js/pwgen.js' %}"></script>
+  
+  <script>
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      })
+  </script>
+  <script>
+    
+    const edit_email = (id, url, csrf_token) => {
+      for (i of document.querySelectorAll('.modal')){
+        i.remove();
+      }
+      //$('.modal').remove();
+
+      let email = null;
+      let quota = null;
+      let password = null;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            email = data.email;
+            quota = data.quota;
+            password = data.password;
+        });
+
+      const modal = document.createElement('div');
+      modal.setAttribute('id', `modal-${id}`);
+      modal.setAttribute('tabindex', '-1');
+      //modal.setAttribute('role', 'dialog');
+      modal.setAttribute('data-bs-backdrop', "static");
+      modal.setAttribute('data-bs-keyboard', "false");
+      modal.setAttribute('aria-labelledby', "ModalLabel");
+      modal.setAttribute('aria-hidden', "true");
+      modal.classList.add("modal", "fade");
+
+      modal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="ModalLabel">Editing ${email}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="${url}">
+
+              <div class="modal-body">
+                <input class="form-control" placeholder="Username" id="modal-username" type="text" name="username" value="">
+                <input class="form-control" placeholder="Password" id="modal-password" type="text" name="password" value="">
+                <input class="form-control" placeholder="Quota" id="modal-password" type="text" name="quota" value="">
+              </div>
+              <div class="modal-footer">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
+                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-outline-primary">Delete</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `.trim();
+      
+      modal_bootstrap = new bootstrap.Modal(modal)
+
+      modal.addEventListener('hidden.bs.modal', function () {
+          modal_bootstrap.dispose();
+        }
+      )
+      modal.addEventListener('shown.bs.modal', function () {
+          modal.querySelector("#modal-username").focus()
+        }
+      );
+      modal_bootstrap.show();
+    };
+  </script>
+  
+  
+  
 {% endblock %}

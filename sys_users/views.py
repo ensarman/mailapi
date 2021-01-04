@@ -4,10 +4,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic import ListView, DeleteView
 
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.db import transaction
+from django.http import JsonResponse
 from django.views.generic.edit import CreateView
 
 from .models import Company, DomainAdmin
@@ -31,7 +33,10 @@ class LoginView(LoginView):
         if self.request.user.is_staff:
             return reverse_lazy("home")
         else:
-            return reverse_lazy("sys_users:email_by_domain")
+            return reverse_lazy("sys_users:email_by_domain", kwargs={
+                'company_id': self.request.user.domainadmin.company.first().id
+            }
+            )
 
 
 class sysUsers(LoginRequiredMixin, ListView):
@@ -139,7 +144,7 @@ class RemoveUser(LoginRequiredMixin, DeleteView):
 
 class ListEmailByDomain(LoginRequiredMixin, ListView):
     """
-    Lista los emails por dominio, pero verificando la autenticacion,
+    Lista los emails por dominio, pero verificando la autenticación,
     osea los dominios que le corresponden al usuario logueado
     """
     title = "Email List By Domain"
@@ -226,11 +231,42 @@ class RemoveEmail(LoginRequiredMixin, DeleteView):
         })
 
 
-# class AddEmail(LoginRequiredMixin, CreateView):
-#     model = Email
+class AddEmail(LoginRequiredMixin, CreateView):
+    model = Email
+    fields = ('domain', 'email', 'password', 'quota')
 
-#     def get_success_url(self):
-#         return reverse_lazy('sys_users:email_by_domain', kwargs={
-#             'company_id': self.kwargs.get('company_id'),
-#             'domain_id': self.kwargs.get('domain_id')
-#         })
+    def get_success_url(self):
+        return reverse_lazy('sys_users:email_by_domain', kwargs={
+            'company_id': self.kwargs.get('company_id'),
+            'domain_id': self.kwargs.get('domain_id')
+        })
+
+    def post(self, request, *args, **kwargs):
+        # self.object = None
+        company_id = self.kwargs.get('company_id')
+        domain_id = self.kwargs.get('domain_id')
+
+        form = self.get_form()
+
+        company = Company.objects.get(id=company_id)
+        response_json = {
+            'status': 'unknown',
+            'comment': 'unknown'
+        }
+
+        virtual_full = company.get_used_quota() + int(request.POST.get('quota')) * \
+            settings.BYTE_TO_GIGABYTE_FACTOR > company.quota_total
+
+        if company.is_full() or virtual_full:
+            response_json['status'] = 'error'
+            response_json['comment'] = 'company full'
+        elif form.is_valid() and not virtual_full:
+            object = form.save()
+            response_json['status'] = 'success'
+            response_json['comment'] = object.email
+
+        if not form.is_valid():
+            response_json['status'] = 'error'
+            response_json['comment'] = 'bad data'
+
+        return JsonResponse(response_json)
