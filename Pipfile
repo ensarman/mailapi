@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 flake8 = "*"
 ipython = "*"
+autopep8 = "*"
 
 [packages]
 django = {version = '>3.0,<4.0'}
@@ -19,4 +20,4 @@ bcrypt = "*"
 requests = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
