@@ -1,6 +1,7 @@
 from django import template
+from django.conf import settings
 
-byte_to_gigabyte_factor = 1073741824
+byte_to_gigabyte_factor = settings.BYTE_TO_GIGABYTE_FACTOR
 
 register = template.Library()
 
