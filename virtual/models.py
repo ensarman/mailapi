@@ -101,7 +101,7 @@ class Alias(models.Model):
     """Alias y redirecciones"""
     domain = models.ForeignKey(Domain, on_delete=models.CASCADE)
     source = models.CharField(max_length=250)
-    destination = models.CharField(max_length=250)
+    destination = models.TextField()
 
     class Meta:
         db_table = 'virtual_aliases'
