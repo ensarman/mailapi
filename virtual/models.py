@@ -47,7 +47,6 @@ class User(models.Model):
     quota = models.PositiveBigIntegerField(default=1)
 
     __previous_password = None
-    __byte_to_gigabyte_factor = 1073741824
     __dovehttp = None
 
     class Meta:
@@ -71,7 +70,7 @@ class User(models.Model):
         return self.email
 
     def quota_gb(self):
-        return self.quota / self.__byte_to_gigabyte_factor
+        return self.quota / settings.BYTE_TO_GIGABYTE_FACTOR
 
     def get_company(self):
         pass
@@ -94,7 +93,7 @@ class User(models.Model):
                 """significa que ha sido editado"""
                 self.password = password.crypt_pass(self.password)
 
-        self.quota *= self.__byte_to_gigabyte_factor
+        self.quota *= settings.BYTE_TO_GIGABYTE_FACTOR
         super(User, self).save(*args, **kwargs)
 
 
