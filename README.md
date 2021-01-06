@@ -38,6 +38,7 @@ DOVECOT_HTTP = {
     'password': 'some_password or None',
     'apiKey': 'some_api_key or None'
 }
+ALLOWED_HOSTS = ["your.host.com"]
 ```
 
 ## if your tables from ispmail already exists

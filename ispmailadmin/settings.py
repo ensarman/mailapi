@@ -68,7 +68,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # DEBUG = True
 DEBUG = False if os.environ.get('DJANGO_DEPLOY') == "1" else True
 
-ALLOWED_HOSTS = []
 
 # Application definition
 
