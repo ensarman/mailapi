@@ -88,9 +88,9 @@
               </td>
               <td>{{ company.quota_total | btogb:True }}</td>
               <td class="small" >
-                {{ company.get_assigned_quota | btogb | floatformat:2 }} GB
+                {{ company.get_used_quota | btogb | floatformat:2 }} GB
                 <br>
-                {{ company.get_percnet_assigned_quota }}%
+                {{ company.get_percnet_used_quota }}%
               </td>
               <td class="align-middle text-center">
                 <a href="{% url 'sys_users:company' company.id %}" class="btn btn-outline-info"><i
