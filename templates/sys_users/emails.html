@@ -89,7 +89,7 @@
                 <td>{{ email.domain }}</td>
                 <td>{{ email.quota | btogb:True }}</td>
                 <td class="small">
-                  {{ email.quota_used | btogb}}GB <br>
+                  {{ email.quota_used | kbtogb | floatformat:4 }} GB <br>
                   {{ email.quota_percent}}%
                 </td>
                 <td colspan="2">

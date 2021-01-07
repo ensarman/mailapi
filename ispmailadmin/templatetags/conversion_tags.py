@@ -17,10 +17,40 @@ def btogb(value, toint=False):
     Returns:
         int, float: converted value
     """
-    converted = value / byte_to_gigabyte_factor
+    converted = value / settings.BYTE_TO_GIGABYTE_FACTOR
+    return int(converted) if toint else converted
+
+
+@register.filter
+def mbtogb(value, toint=False):
+    """Converts the value in bytes to Gigabytes
+
+    Args:
+        value (int): value in megabytes
+        toint (bool, optional): if the return the value will be float. Defaults to False.
+
+    Returns:
+        int, float: converted value
+    """
+    converted = value / settings.MEGABYTE_TO_GIGABYTE_FACTOR
+    return int(converted) if toint else converted
+
+
+@register.filter
+def kbtogb(value, toint=False):
+    """Converts the value in bytes to Gigabytes
+
+    Args:
+        value (int): value in megabytes
+        toint (bool, optional): if the return the value will be float. Defaults to False.
+
+    Returns:
+        int, float: converted value
+    """
+    converted = value / settings.KILOBYTE_TO_GIGABYTE_FACTOR
     return int(converted) if toint else converted
 
 
 @register.filter
 def gbtob(value):
-    return value * byte_to_gigabyte_factor
+    return value * settings.BYTE_TO_GIGABYTE_FACTOR
