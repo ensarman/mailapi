@@ -26,9 +26,12 @@ function replace_search() {
         "type",
         search_button.classList.contains("search-button-date") ? "date" : "text"
       );
+      const text = th.querySelector("span").innerText;
       input.setAttribute("name", th.id);
-      input.setAttribute("placeholder", th.innerText.trim());
+      input.setAttribute("placeholder", text.trim());
+      input.setAttribute("aria-label", text.trim());
       input.setAttribute("class", "form-control");
+      input.setAttribute("aria-describedby", "basic-addon2");
 
       const close_button = document.createElement("a");
       close_button.setAttribute("href", "#");
@@ -36,29 +39,38 @@ function replace_search() {
       close_button.innerHTML = "<strong>&times;</strong>";
 
       const input_group = document.createElement("div");
-      input_group.setAttribute("class", "input-group mb-3");
+      input_group.setAttribute("class", "input-group");
 
       const input_group_append = document.createElement("div");
-      input_group.setAttribute("class", "input-group-append");
-      input_group.appendChild(close_button);
+      input_group_append.setAttribute("class", "input-group-append");
+      input_group_append.appendChild(close_button);
 
       input_group.appendChild(input);
       input_group.appendChild(input_group_append);
 
       th.appendChild(input_group);
+      input.focus();
 
-      input.onkeyup = (event) => {
-        if (event.code === "Enter") {
-          //console.log(event.code);
-          event.target.closest("form").submit();
-        }
-      };
-
-      close_button.onclick = (event) => {
+      const restore_th = () => {
         th.removeChild(input_group);
         for (let element of th.querySelectorAll("*")) {
           element.classList.remove("d-none");
         }
+      };
+
+      input.onkeyup = (event) => {
+        switch (event.code) {
+          case "Enter":
+            event.target.closest("form").submit();
+            break;
+          case "Escape":
+            restore_th();
+            break;
+        }
+      };
+
+      close_button.onclick = (event) => {
+        restore_th();
       };
 
       close_buttons.push(close_button);
