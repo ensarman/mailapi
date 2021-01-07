@@ -1,49 +1,71 @@
-let th;
-let close_button;
-let search_button = $('.search-button');
+//let th;
+//let close_button;
+let search_buttons = document.querySelectorAll(".search-button");
 
 function replace_search() {
-    th = search_button.closest('th');
-    th.on('click', 'a',function(event) {
-        event.preventDefault();
-        th = $(this).closest('th');
-        const contenido = th.html();
-        const input = $('<input>');
-        close_button = $('<a href="#" class="input-group-text"><strong>&times;</strong></a>');
+  let close_buttons = [];
+  for (const search_button of search_buttons) {
+    const th = search_button.closest("th");
+    //th.onclick = () => { };
+    search_button.onclick = (event) => {
+      event.preventDefault();
 
-        input.attr({
-            'type': (($(this).hasClass('search-button-date')) ? 'date' : 'text'),
-            'name': th.attr('id'),
-            'placeholder': th.text().trim(),
-            'class': 'form-control',
-        });
+      //const previous_content = replace_th_with_search(th);
 
-        const input_group = $(`<div class="input-group mb-3"></div>`);
-        const input_group_append = $('<div class="input-group-append"></div>');
-        input_group_append.append(close_button);
+      //const previous_content = th.children;
 
-        input_group.append(input, input_group_append);
+      for (let element of th.querySelectorAll("*")) {
+        element.classList.add("d-none");
+      }
 
-        th.empty();
-        th.append(input_group);
+      //th.innerHTML = "";
 
-        input.unbind();
-        input.keyup(function (event) {
+      //console.log(previous_content);
+      const input = document.createElement("input");
+      input.setAttribute(
+        "type",
+        search_button.classList.contains("search-button-date") ? "date" : "text"
+      );
+      input.setAttribute("name", th.id);
+      input.setAttribute("placeholder", th.innerText.trim());
+      input.setAttribute("class", "form-control");
 
-            if (event.keyCode === 13) {
-                console.log(event.keyCode);
-                $(this).closest('form').submit();
-            }
-        });
-        close_button.click(function () {
-            th.empty();
-            th.html(contenido);
-        });
-        input.focus()
-    });
-    return close_button;
+      const close_button = document.createElement("a");
+      close_button.setAttribute("href", "#");
+      close_button.setAttribute("class", "input-group-text");
+      close_button.innerHTML = "<strong>&times;</strong>";
+
+      const input_group = document.createElement("div");
+      input_group.setAttribute("class", "input-group mb-3");
+
+      const input_group_append = document.createElement("div");
+      input_group.setAttribute("class", "input-group-append");
+      input_group.appendChild(close_button);
+
+      input_group.appendChild(input);
+      input_group.appendChild(input_group_append);
+
+      th.appendChild(input_group);
+
+      input.onkeyup = (event) => {
+        if (event.code === "Enter") {
+          //console.log(event.code);
+          event.target.closest("form").submit();
+        }
+      };
+
+      close_button.onclick = (event) => {
+        th.removeChild(input_group);
+        for (let element of th.querySelectorAll("*")) {
+          element.classList.remove("d-none");
+        }
+      };
+
+      close_buttons.push(close_button);
+    };
+  }
+
+  return close_buttons;
 }
 
-close_button = replace_search();
-
-
+replace_search();
