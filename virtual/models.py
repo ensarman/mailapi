@@ -23,7 +23,8 @@ class Domain(models.Model):
         max_length=50, unique=True,
         validators=(
             RegexValidator(
-                regex=r'^[a-zA-Z0-9-]*\.[a-z]*$',
+                #                regex=r'^[a-zA-Z0-9-]*\.[a-z]*$',
+                regex=r'\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b',
                 message="Enter a valid domain name"
             ),)
     )
