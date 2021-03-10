@@ -14,7 +14,9 @@ class UserForm(forms.ModelForm):
                 'placeholder': "Password",
                 'autocomplete': "new-password",
             }),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': "E-Mail"}),
+            'email': forms.EmailInput(
+                attrs={'class': 'form-control', 'placeholder': "E-Mail"}
+            ),
             'domain': forms.Select(attrs={'class': 'custom-select'}),
             'quota': forms.NumberInput(attrs={
                 'class': 'form-control',

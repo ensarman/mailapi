@@ -8,7 +8,8 @@ from .views import (
     RemoveUser,
     RemoveEmail,
     ListEmailByDomain,
-    AddEmail
+    AddEmail,
+    UpdateEmail
 )
 from virtual.models import User as Email
 
@@ -35,6 +36,14 @@ urlpatterns = [
         ListEmailByDomain.as_view(),
         name="email_by_domain"
     ),
-    path('add_email/<int:company_id>/<int:domain_id>/', AddEmail.as_view(), name="add_email"),
-    path('remove_email/<int:company_id>/<int:domain_id>/<int:pk>', RemoveEmail.as_view(), name='remove_email')
+    path(
+        'add_email/<int:company_id>/<int:domain_id>/',
+        AddEmail.as_view(), name="add_email"
+    ),
+    path('update_email/<int:company_id>/<int:domain_id>/<int:pk>', UpdateEmail.as_view(), name="update_email"),
+    path(
+        'remove_email/<int:company_id>/<int:domain_id>/<int:pk>',
+        RemoveEmail.as_view(), name='remove_email'
+        ),
+    #   path()
 ]

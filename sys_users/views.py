@@ -6,11 +6,11 @@ from django.views.generic import ListView, DeleteView
 
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect
 from django.db import transaction
 from django.http import JsonResponse
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 
 from .models import Company, DomainAdmin
 from .forms import CompanyForm, CreateUserForm
@@ -153,24 +153,35 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
     ordering = 'email'
     companies = None
     domains = None
+    user = None
     template_name = 'sys_users/emails.html'
     email_form = EmailForm
 
-    def get_queryset(self):
-        user = self.request.user.domainadmin
-        self.companies = user.company.all()
+    def __init__(self, *args, **kwargs):
+        super(ListEmailByDomain, self).__init__()
 
+    def get(self, *args, **kwargs):
+        self.user = self.request.user.domainadmin
+        self.companies = self.user.company.all()
+        if self.companies.count() == 1:
+            # URL = reverse(
+            #     'sys_users:email_by_domain',
+            #     kwargs={
+            #         'company_id': self.companies[0].id,
+            #     }
+            # )
+            self.kwargs = {
+                    'company_id': self.companies[0].id,
+                    'domain_id': self.companies[0].domain.all()[0].id,
+                }
+            # return redirect(URL)
+
+        return super(ListEmailByDomain, self).get(*args, **kwargs)
+
+    def get_queryset(self):
         if self.kwargs.get('company_id'):
             """ Todos los dominios de la compañía seleccionada """
-            # if self.kwargs.get('domain_id'):
-            #     """si es que hay domain_id en la url"""
-
-            # self.domains = self.companies.get(id=self.kwargs.get(
-            #     'company_id')).domain.all().filter(id=self.kwargs.get('domain_id'))
-            # else:
-            #     self.domains = user.company.all().get(
-            #         id=self.kwargs.get('company_id')).domain.all()
-            self.domains = user.company.all().get(
+            self.domains = self.user.company.all().get(
                 id=self.kwargs.get('company_id')).domain.all()
             emails = Email.objects.none()
             for domain in self.domains:
@@ -205,7 +216,7 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             emails = emails.filter(
                 email__icontains=self.request.GET.get('email'))
 
-        return emails.order_by('domain')
+        return emails.order_by('-id')
 
     def get_context_data(self, *args, **kwargs):
         current_domain = ""
@@ -244,7 +255,6 @@ class AddEmail(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         # self.object = None
         company_id = self.kwargs.get('company_id')
-        domain_id = self.kwargs.get('domain_id')
 
         form = self.get_form()
 
@@ -262,6 +272,47 @@ class AddEmail(LoginRequiredMixin, CreateView):
             response_json['comment'] = 'company full'
         elif form.is_valid() and not virtual_full:
             object = form.save()
+            response_json['status'] = 'success'
+            response_json['comment'] = object.email
+
+        if not form.is_valid():
+            response_json['status'] = 'error'
+            response_json['comment'] = 'bad data'
+
+        return JsonResponse(response_json)
+
+
+class UpdateEmail(LoginRequiredMixin, UpdateView):
+    model = Email
+    form_class = EmailForm
+
+    def get_success_url(self):
+        return reverse_lazy('sys_users:email_by_domain', kwargs={
+            'company_id': self.kwargs.get('company_id'),
+            'domain_id': self.kwargs.get('domain_id')
+        })
+
+    def post(self, request, *args, **kwargs):
+        company_id = self.kwargs.get('company_id')
+
+        form = self.get_form()
+
+        company = Company.objects.get(id=company_id)
+        response_json = {
+            'status': 'unknown',
+            'comment': 'unknown'
+        }
+
+        virtual_full = company.get_used_quota() + int(request.POST.get('quota')) * \
+            settings.BYTE_TO_GIGABYTE_FACTOR > company.quota_total
+
+        # TODO: hacer el código para validar si se ha cambiado la quota o la contraseña
+
+        if company.is_full() or virtual_full:
+            response_json['status'] = 'error'
+            response_json['comment'] = 'company full'
+        elif form.is_valid() and not virtual_full:
+            # object = form.save()
             response_json['status'] = 'success'
             response_json['comment'] = object.email
 

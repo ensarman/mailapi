@@ -96,7 +96,15 @@
                   <button
                       class="btn btn-outline-primary"
                       type="button"
-                      onclick="edit_email('{{ email.pk }}', '{% url 'virtual:user_detail_json' email.pk %}', '{{ csrf_token }}')"
+                      onclick="edit_email('{{ email.pk }}', '{% url 'virtual:user_detail_json' email.pk %}')"
+                      id = "{{ email.pk }}"
+                      geturl = "{% url 'virtual:user_detail_json' email.pk %}"
+                      {% if view.kwargs.company_id %}
+                      editurl="{% url 'sys_users:update_email' view.kwargs.company_id email.domain.pk email.pk %}"
+                      {% else %}
+                      editurl="{% url 'sys_users:update_email' '0' email.domain.pk email.pk %}"
+                      {% endif %}
+                      
                   >
                     <i class="fas fa-edit"></i>
                   </button>
@@ -123,14 +131,14 @@
   
   {% if view.kwargs.domain_id %}
   <!-- Modal -->
-  <div class="modal fade" id="NewEmailModal" tabindex="-1" aria-labelledby="NewEmailModalLabel" aria-hidden="true">
+  <div class="modal fade" id="EmailModal" tabindex="-1" aria-labelledby="EmailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="NewEmailModalLabel">New Email</h5>
+          <h5 class="modal-title" id="EmailModalLabel"></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form id="new_email_form" action="{% url 'sys_users:add_email' view.kwargs.company_id current_domain.id %}" method="post" >
+        <form action="" method="post" >
         {% csrf_token %}
           <div class="container-fluid">
               <div class="modal-body">
@@ -174,15 +182,56 @@
       </div>
     </div>
   </div>
+  
+
+  {% endif %}
+{% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/delete_modal.js' %}"></script>
+  <script src="{% static 'js/search.js' %}"></script>
+  <script src="{% static 'js/pwgen.js' %}"></script>
+
+  <script>
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      })
+  </script>
+  
   <script>
     // open the modal and execute some things 
-    const new_mail_modal = document.querySelector('#NewEmailModal');
-    const check_show_password = new_mail_modal.querySelector('#check_show_password');
+    const mail_modal = document.querySelector('#EmailModal');
+    //identifing the elemts
+    const modal_title = mail_modal.querySelector('#EmailModalLabel');
+    const modal_form = mail_modal.querySelector('form');
+    const save_button = mail_modal.querySelector('#btn_save_new_mail');
+    const email_input = mail_modal.querySelector('#{{ view.email_form.email.auto_id  }}');
+    const password_input = mail_modal.querySelector('#{{ view.email_form.password.auto_id  }}');
+    const quota_input = mail_modal.querySelector('#{{ view.email_form.quota.auto_id  }}');
+    const check_show_password = mail_modal.querySelector('#check_show_password');
+    
+    //identifing the modal
+    const modal_bootstrap = new  bootstrap.Modal(mail_modal);
+
+    
+  </script>
+
+
+  <script>
+   
     btn_new_email.onclick = () => {
+      modal_title.innerHTML = "New Email";
       check_show_password.checked = false;
-      const modal_bootstrap = new  bootstrap.Modal(new_mail_modal);
+      modal_form.id = "new_email_form"
+      email_input.value = "";
+      email_input.removeAttribute('readonly');
+      email_input.classList.remove("form-control-plaintext");
+      email_input.classList.add("form-control");
       modal_bootstrap.show();
+      
     };
+
     // fixes the email putting the corresponding domain
     document.getElementById('{{ view.email_form.email.auto_id }}').addEventListener('change', e => {
       const domain = "{{ current_domain.name }}";
@@ -208,104 +257,82 @@
       {{ view.email_form.password.auto_id }}.type = "text";
       check_show_password.checked = true;
     };
-    btn_save_new_mail.onclick = () => {
-      let form_data = new FormData(new_email_form);
-      fetch(new_email_form.action, {method: 'POST', body: form_data})
-      .then(response=>response.json())
-      .then(data=>{
-        console.log(data);
-        if (data.status == 'success'){
-          window.location.reload(false);
-        }
-        else {
-          alert(`Error: ${data.comment}`)
-        }
-      })
-    };
-  </script>
-
-  {% endif %}
-{% endblock %}
-
-{% block js %}
-  <script src="{% static 'js/delete_modal.js' %}"></script>
-  <script src="{% static 'js/search.js' %}"></script>
-  <script src="{% static 'js/pwgen.js' %}"></script>
-  
-  <script>
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-      })
-  </script>
-  <script>
     
-    const edit_email = (id, url, csrf_token) => {
-      for (i of document.querySelectorAll('.modal')){
-        i.remove();
-      }
-      //$('.modal').remove();
+    
+  </script>
 
+  <script>
+    // para editar los emails
+    let update_url = '';
+    let update_id = '';
+    const edit_email = (id, url) => {
       let email = null;
       let quota = null;
-      let password = null;
+      let edit_email_id = null;
+      
+      modal_form.id = "edit_email_form"
+
+      update_url = document.getElementById(`${id}`).getAttribute('editurl');
 
       fetch(url)
         .then(response => response.json())
         .then(data => {
-            email = data.email;
-            quota = data.quota;
-            password = data.password;
+            modal_title.innerHTML = `Edit <b>${data.email}</b>`;
+            //filing data
+            edit_email_id = data.id;            
+            email_input.value = data.email;
+            email_input.setAttribute('readonly', true);
+            email_input.classList.add("form-control-plaintext");
+            email_input.classList.remove("form-control");
+            quota_input.value = data.quota / 1073741824;
+
         });
 
-      const modal = document.createElement('div');
-      modal.setAttribute('id', `modal-${id}`);
-      modal.setAttribute('tabindex', '-1');
-      //modal.setAttribute('role', 'dialog');
-      modal.setAttribute('data-bs-backdrop', "static");
-      modal.setAttribute('data-bs-keyboard', "false");
-      modal.setAttribute('aria-labelledby', "ModalLabel");
-      modal.setAttribute('aria-hidden', "true");
-      modal.classList.add("modal", "fade");
-
-      modal.innerHTML = `
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="ModalLabel">Editing ${email}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post" action="${url}">
-
-              <div class="modal-body">
-                <input class="form-control" placeholder="Username" id="modal-username" type="text" name="username" value="">
-                <input class="form-control" placeholder="Password" id="modal-password" type="text" name="password" value="">
-                <input class="form-control" placeholder="Quota" id="modal-password" type="text" name="quota" value="">
-              </div>
-              <div class="modal-footer">
-                  <input type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}">
-                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="submit" class="btn btn-outline-primary">Delete</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      `.trim();
-      
-      modal_bootstrap = new bootstrap.Modal(modal)
-
-      modal.addEventListener('hidden.bs.modal', function () {
-          modal_bootstrap.dispose();
-        }
-      )
-      modal.addEventListener('shown.bs.modal', function () {
-          modal.querySelector("#modal-username").focus()
-        }
-      );
+      //showing modal
       modal_bootstrap.show();
     };
   </script>
   
+  <script>
+  const save_function = (event) => {
+    save_button.setAttribute('disabled', true)
+    //save_button.classList.add('spinner-border')
+    save_button.innerHTML = `
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    `;
+
+    let url = "";
+    if (modal_form.id == "new_email_form"){ // new user
+      url = "{% url 'sys_users:add_email' view.kwargs.company_id view.current_domain.id|yesno:'current_domain.id,0' %}";
+    }
+    else if(modal_form.id=="edit_email_form"){ //edit user
+      url = update_url;
+      console.log(url)
+    }
+    else{
+      url = "";
+    }
+    let form_data = new FormData(modal_form);
+    fetch(url, {method: 'POST', body: form_data})
+    .then(response=>response.json())
+    .then(data=>{
+      save_button.removeAttribute('disabled')
+      console.log(data);
+      if (data.status == 'success'){
+        window.location.reload(false);
+        }
+      else {
+        alert(`Error: ${data.comment}`)
+      }
+      save_button.innerHTML = 'Save changes';
+    });
+
+  }
+
+  save_button.addEventListener('click', save_function)
+  </script>
   
   
 {% endblock %}
