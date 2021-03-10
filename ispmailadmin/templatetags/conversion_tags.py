@@ -23,7 +23,7 @@ def btogb(value, toint=False):
 
 @register.filter
 def mbtogb(value, toint=False):
-    """Converts the value in bytes to Gigabytes
+    """Converts the value in megabytes to Gigabytes
 
     Args:
         value (int): value in megabytes
@@ -38,7 +38,7 @@ def mbtogb(value, toint=False):
 
 @register.filter
 def kbtogb(value, toint=False):
-    """Converts the value in bytes to Gigabytes
+    """Converts the value in kilobytes to Gigabytes
 
     Args:
         value (int): value in megabytes
