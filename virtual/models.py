@@ -90,7 +90,7 @@ class User(models.Model):
                 self.password = password.crypt_pass(password.pw_gen())
         else:
             """si es que hay id es que es un update"""
-            if self.password != self.__previous_password:
+            if self.password != self.__previous_password and self.password != '':
                 """significa que ha sido editado"""
                 self.password = password.crypt_pass(self.password)
 

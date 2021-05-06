@@ -171,9 +171,9 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
             #     }
             # )
             self.kwargs = {
-                    'company_id': self.companies[0].id,
-                    'domain_id': self.companies[0].domain.all()[0].id,
-                }
+                'company_id': self.companies[0].id,
+                'domain_id': self.companies[0].domain.all()[0].id,
+            }
             # return redirect(URL)
 
         return super(ListEmailByDomain, self).get(*args, **kwargs)
@@ -295,6 +295,7 @@ class UpdateEmail(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         company_id = self.kwargs.get('company_id')
 
+        self.object = self.get_object()
         form = self.get_form()
 
         company = Company.objects.get(id=company_id)
@@ -308,16 +309,32 @@ class UpdateEmail(LoginRequiredMixin, UpdateView):
 
         # TODO: hacer el código para validar si se ha cambiado la quota o la contraseña
 
+        if request.POST.get('password') == '':
+            pass
+
         if company.is_full() or virtual_full:
             response_json['status'] = 'error'
             response_json['comment'] = 'company full'
         elif form.is_valid() and not virtual_full:
-            # object = form.save()
+            saved_email = form.save()
             response_json['status'] = 'success'
-            response_json['comment'] = object.email
+            response_json['comment'] = saved_email.email
 
         if not form.is_valid():
             response_json['status'] = 'error'
             response_json['comment'] = 'bad data'
 
         return JsonResponse(response_json)
+
+
+def update_email(request):
+
+    return redirect(
+        reverse_lazy(
+            'sys_users:email_by_domain',
+            kwargs={
+                'company_id': 0,
+                'domain_id': 0,
+            }
+        )
+    )

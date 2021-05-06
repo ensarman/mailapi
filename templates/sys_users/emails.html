@@ -138,14 +138,18 @@
           <h5 class="modal-title" id="EmailModalLabel"></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="" method="post" >
+        <form action="" method="post" autocomplete="off">
         {% csrf_token %}
           <div class="container-fluid">
               <div class="modal-body">
                 <input type="hidden" name="domain" value="{{ current_domain.id }}">
                 <div class="row mb-3">
+                    <input id="username" style="display:none" type="text" name="fakeusernameremembered">
+                    <input id="password" style="display:none" type="password" name="fakepasswordremembered">
                     <div class="col-2">
-                      <label for="{{ view.email_form.email.auto_id }}">Email:</label>
+                      <label for="{{ view.email_form.email.auto_id }}">
+                      Email:
+                      </label>
                     </div>
                     <div class="col-10">
                       {{ view.email_form.email }}
@@ -211,6 +215,9 @@
     const quota_input = mail_modal.querySelector('#{{ view.email_form.quota.auto_id  }}');
     const check_show_password = mail_modal.querySelector('#check_show_password');
     
+    //get default save button HTML
+    default_save_button_html = save_button.innerHTML;
+
     //identifing the modal
     const modal_bootstrap = new  bootstrap.Modal(mail_modal);
 
@@ -228,21 +235,26 @@
       email_input.removeAttribute('readonly');
       email_input.classList.remove("form-control-plaintext");
       email_input.classList.add("form-control");
+      password_input.value = "";
       modal_bootstrap.show();
       
     };
 
     // fixes the email putting the corresponding domain
-    document.getElementById('{{ view.email_form.email.auto_id }}').addEventListener('change', e => {
-      const domain = "{{ current_domain.name }}";
-      const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-      if (!e.target.value.match(re))
-        e.target.value = `${e.target.value}@${domain}`;
-      else{
-        const address = e.target.value.split('@')[0];
-        e.target.value = `${address}@${domain}`;
-      }
-    });
+    document.getElementById('{{ view.email_form.email.auto_id }}')
+      .addEventListener('change', e => {
+        const domain = "{{ current_domain.name }}";
+        const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+        if (e.target.value == `@${domain}`){
+          e.target.value = `@${domain}`;
+        }
+        else if (!e.target.value.match(re))
+          e.target.value = `${e.target.value}@${domain}`;
+        else{
+          const address = e.target.value.split('@')[0];
+          e.target.value = `${address}@${domain}`;
+        }
+      });
     check_show_password.onclick = (event) => {
       //let password_input = document.getElementById('{{ view.email_form.password.auto_id }}')
       if ({{ view.email_form.password.auto_id }}.type === "password"){
@@ -262,26 +274,28 @@
   </script>
 
   <script>
-    // para editar los emails
+    // function to edit emails
     let update_url = '';
-    let update_id = '';
+    let update_id = null;
     const edit_email = (id, url) => {
       let email = null;
       let quota = null;
-      let edit_email_id = null;
       
       modal_form.id = "edit_email_form"
 
       update_url = document.getElementById(`${id}`).getAttribute('editurl');
+
+      email_input.setAttribute('readonly', true);
+      password_input.value = "";
+      update_id = id; 
 
       fetch(url)
         .then(response => response.json())
         .then(data => {
             modal_title.innerHTML = `Edit <b>${data.email}</b>`;
             //filing data
-            edit_email_id = data.id;            
+            
             email_input.value = data.email;
-            email_input.setAttribute('readonly', true);
             email_input.classList.add("form-control-plaintext");
             email_input.classList.remove("form-control");
             quota_input.value = data.quota / 1073741824;
@@ -294,27 +308,46 @@
   </script>
   
   <script>
-  const save_function = (event) => {
-    save_button.setAttribute('disabled', true)
-    //save_button.classList.add('spinner-border')
-    save_button.innerHTML = `
+  const change_button_to_spin = (button) => {
+    button.setAttribute('disabled', true);
+    button.innerHTML = `
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
     `;
+  }
+  const restore_button_to_default = (button) => {
+    button.removeAttribute('disabled');
+    button.innerHTML = default_save_button_html;
+  }
+  
+  const save_function = (event) => {
+    change_button_to_spin(save_button);
 
     let url = "";
+    let form_data = new FormData(modal_form);
+    console.log(event.target);
+
     if (modal_form.id == "new_email_form"){ // new user
-      url = "{% url 'sys_users:add_email' view.kwargs.company_id view.current_domain.id|yesno:'current_domain.id,0' %}";
+      if (password_input.value != ""){
+        url = "{% url 'sys_users:add_email' view.kwargs.company_id view.current_domain.id|yesno:'current_domain.id,0' %}";
+      }
+      else{
+        alert("password must not be empty");
+        restore_button_to_default(save_button);
+      }
     }
     else if(modal_form.id=="edit_email_form"){ //edit user
       url = update_url;
-      console.log(url)
+      form_data.append('id', update_id);
+      for ($i of form_data.entries()){
+        console.log($i);
+      }
     }
     else{
       url = "";
     }
-    let form_data = new FormData(modal_form);
+    
     fetch(url, {method: 'POST', body: form_data})
     .then(response=>response.json())
     .then(data=>{

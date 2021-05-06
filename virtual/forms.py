@@ -7,15 +7,21 @@ class UserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', 'domain', 'password', 'quota')
+        fields = ('id', 'email', 'domain', 'password', 'quota')
         widgets = {
-            'password': forms.PasswordInput(attrs={
-                'class': 'form-control',
-                'placeholder': "Password",
-                'autocomplete': "new-password",
-            }),
+            'password': forms.PasswordInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': "Password",
+                    'autocomplete': "new-password",
+                }
+            ),
             'email': forms.EmailInput(
-                attrs={'class': 'form-control', 'placeholder': "E-Mail"}
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': "E-Mail",
+                    'autocomplete': "nope",
+                }
             ),
             'domain': forms.Select(attrs={'class': 'custom-select'}),
             'quota': forms.NumberInput(attrs={
