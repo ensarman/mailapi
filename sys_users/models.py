@@ -64,7 +64,8 @@ class Company(models.Model):
 class DomainAdmin(models.Model):
     """Datos del administador de dominio,
     tendrá un enlace directo al usuario de nuestro sistema"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=False, null=False)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, blank=False, null=False)
     company = models.ManyToManyField('Company')
 
     def __str__(self):
