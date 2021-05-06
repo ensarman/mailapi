@@ -93,6 +93,8 @@ class User(models.Model):
             if self.password != self.__previous_password and self.password != '':
                 """significa que ha sido editado"""
                 self.password = password.crypt_pass(self.password)
+            else:
+                self.password = self.__previous_password
 
         self.quota *= settings.BYTE_TO_GIGABYTE_FACTOR
         super(User, self).save(*args, **kwargs)
