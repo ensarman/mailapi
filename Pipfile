@@ -13,12 +13,12 @@ django = {version = '>3.0,<4.0'}
 mysqlclient = "*"
 graphene-django = "*"
 django-filter = "*"
-django-graphql-jwt = "*"
 django-cors-headers = "*"
 passlib = "*"
 bcrypt = "*"
 requests = "*"
 gunicorn = "*"
+django-graphql-jwt = "==0.3.1"
 
 [requires]
 python_version = "3.7"
