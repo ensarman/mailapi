@@ -6,7 +6,6 @@ from django.conf import settings
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-
 # Create your models here.
 
 
@@ -15,6 +14,11 @@ Estos modelos siguen el estandar creado por ISPmail
 si hay algo raro es que los nombres estan de acuerdo a ese estandar
 Los nombres de las tablas están en plural por el estandar de ISPmail
 """
+dovehttp = DoveAdmHTTPClient(
+    apiurl=settings.DOVECOT_HTTP['url'],
+    user=settings.DOVECOT_HTTP['user'],
+    password=settings.DOVECOT_HTTP['password'],
+)
 
 
 class Domain(models.Model):
@@ -38,6 +42,17 @@ class Domain(models.Model):
     def get_companies(self):  # este es para el admin
         return '\n'.join(company.name for company in self.company_set.all())
 
+    def get_quota(self):
+        all_users = self.user_set.values()
+        total_quota = 0
+        for user in all_users:
+            total_quota += user['quota']
+
+        return total_quota
+
+    def get_quotagb(self):
+        return self.get_quota() / settings.BYTE_TO_GIGABYTE_FACTOR
+
 
 class User(models.Model):
     """Usuarios del correo electronico"""
@@ -56,14 +71,10 @@ class User(models.Model):
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
         self.__previous_password = self.password
-        self.__dovehttp = DoveAdmHTTPClient(
-            apiurl=settings.DOVECOT_HTTP['url'],
-            user=settings.DOVECOT_HTTP['user'],
-            password=settings.DOVECOT_HTTP['password'],
-        )
+
         if self.id:
             """Only enters here only if the user exists"""
-            storage_quota = self.__dovehttp.get_quota(user=self.email)
+            storage_quota = dovehttp.get_quota(user=self.email)
             self.quota_used = int(storage_quota['value'])
             self.quota_percent = int(storage_quota['percent'])
 

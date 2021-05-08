@@ -41,7 +41,8 @@ class DoveAdmHTTPClient(object):
         if self.password:
             self.reqs.auth = (self.user, self.password)
         if self.apikey:
-            self.reqs.headers.update({'Authorization': 'X-Dovecot-API ' + b64encode(self.apikey)})
+            self.reqs.headers.update(
+                {'Authorization': 'X-Dovecot-API ' + b64encode(self.apikey)})
 
     def get_commands(self):
         """ Retrieve list of available commands and their parameters from API """
@@ -55,7 +56,8 @@ class DoveAdmHTTPClient(object):
             for command in commands:
                 self.commands[command['command']] = {}
                 for param in command['parameters']:
-                    self.commands[command['command']][param['name']] = param['type']
+                    self.commands[command['command']
+                                  ][param['name']] = param['type']
             return req.text()
         else:
             return [["error", {"type": "httpError", "httpError": req.status_code}, self.sufix]]
@@ -63,7 +65,8 @@ class DoveAdmHTTPClient(object):
     def run_command(self, command, parameters):
         """ Run any command with parameters """
         try:
-            response = self.reqs.post(self.apiurl, json=[[command, parameters, self.sufix]])
+            response = self.reqs.post(
+                self.apiurl, json=[[command, parameters, self.sufix]])
             if response.status_code == 200:
                 return response.json()
             return [["error", {"type": "httpError", "httpError": response.status_code}, self.sufix]]
@@ -123,6 +126,43 @@ class DoveAdmHTTPClient(object):
                             return 'invalid type'
             else:
                 return f"Status Code not 200: {response.status_code}"
+
+        except requests.exceptions.ConnectionError:
+            return "Conection Error"
+
+    def get_domin_used_quota(self, domain, key_type='STORAGE'):
+        """
+        Gets a domain used quota
+
+        Args:
+            domain (str): an domain to get quota
+            key (str, optional): ['value', 'limit', 'percent']
+            key_type (str, optional): 'STORAGE', 'MESSAGE'. Defaults to 'STORAGE'.
+        Returns:
+            str: the spected value or an error description
+            dict: all user quota data if no key is specified
+        """
+        types = {
+            'STORAGE': 0,
+            'MESSAGE': 1
+        }
+
+        try:
+            response = self.reqs.post(
+                self.apiurl,
+                json=[["quotaGet", {'user': f'*@{domain}'}, self.sufix]]
+            )
+            if self.is_error(response):
+                return self.parse_error(response)
+            else:
+                if key_type in key_type:
+                    total_quota = 0
+                    for user in response.json()[0][1]:
+                        if user['type'] == key_type:
+                            total_quota += user['value']
+                    return total_quota
+                else:
+                    return 'invalid key_type'
 
         except requests.exceptions.ConnectionError:
             return "Conection Error"
