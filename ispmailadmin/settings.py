@@ -18,43 +18,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-class Migration(migrations.Migration):
-
-    initial = True
-
-    dependencies = [
-    ]
-
-    operations = [
-        migrations.CreateModel(
-            name='Domains',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Users',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.CharField(max_length=100, unique=True)),
-                ('password', models.CharField(max_length=100)),
-                ('quota', models.BigIntegerField()),
-                ('domain_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='virtual.Domains')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Aliases',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('source', models.CharField(max_length=250)),
-                ('destination', models.CharField(max_length=250)),
-                ('domain_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='virtual.Domains')),
-            ],
-        ),
-    ]
-
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -122,7 +85,7 @@ WSGI_APPLICATION = 'ispmailadmin.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
