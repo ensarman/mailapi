@@ -46,8 +46,7 @@ class Company(models.Model):
         """
         self.all_quota = 0
         for domain in self.domain.all():
-            for user in domain.user_set.all():
-                self.all_quota += user.quota
+            self.all_quota += domain.get_quota()
         return self.all_quota
 
     def get_percnet_used_quota(self):

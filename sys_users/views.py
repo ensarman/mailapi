@@ -50,7 +50,7 @@ class CompanyView(LoginRequiredMixin, ListView):
     """
     model = Company
     ordering = '-id'
-    paginate_by = 5
+    paginate_by = 20
     title = "Email Magnament"
     company_form = CompanyForm
     domain_form = DomainForm
