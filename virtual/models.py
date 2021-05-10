@@ -94,6 +94,7 @@ class User(models.Model):
                 """significa que ha sido editado"""
                 self.password = password.crypt_pass(self.password)
             else:
+                """Significa que no ha sido editado"""
                 self.password = self.__previous_password
 
         self.quota *= settings.BYTE_TO_GIGABYTE_FACTOR
