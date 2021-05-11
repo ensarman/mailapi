@@ -304,15 +304,19 @@ class UpdateEmail(LoginRequiredMixin, UpdateView):
             'comment': 'unknown'
         }
 
-        virtual_full = company.get_used_quota() + int(request.POST.get('quota')) * \
-            settings.BYTE_TO_GIGABYTE_FACTOR > company.quota_total
+        requested_quota = int(request.POST.get('quota')) * \
+            settings.BYTE_TO_GIGABYTE_FACTOR
 
-        # TODO: hacer el código para validar si se ha cambiado la quota o la contraseña
+        increment = self.object.quota - requested_quota
 
-        if request.POST.get('password') == '':
-            pass
+        if self.object.quota < requested_quota:
+            increment = abs(increment)
+        else:
+            increment = increment * -1
 
-        if company.is_full() or virtual_full:
+        virtual_full = company.get_used_quota() + increment > company.quota_total
+
+        if (company.is_full() and increment >= 0) or virtual_full:
             response_json['status'] = 'error'
             response_json['comment'] = 'company full'
         elif form.is_valid() and not virtual_full:
