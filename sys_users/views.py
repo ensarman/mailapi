@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404, HttpResponseForbidden
 from django.views.generic.edit import CreateView, UpdateView
 
 from .models import Company, DomainAdmin
@@ -340,13 +340,14 @@ class ListAliasByDomain(LoginRequiredMixin, ListView):
     model = Alias
     template_name = "sys_users/alias.html"
 
+    def get_queryset(self):
+        return super().get_queryset()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         aliases = self.model.objects.filter(
             domain=self.kwargs['domain_id'])
-
-        #context['sources'] = sources
 
         # divide alias and forwards
         context['forwards'] = []
@@ -365,6 +366,13 @@ class ListAliasByDomain(LoginRequiredMixin, ListView):
 
         return context
 
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
+        forbiden = True
+        for company in request.user.domainadmin.company.all():
+            if company.domain.all().filter(id=self.kwargs['domain_id']):
+                forbiden = False
 
-        return super().get_queryset()
+        if forbiden:
+            return HttpResponseForbidden()
+        else:
+            return super().get(request, *args, **kwargs)
