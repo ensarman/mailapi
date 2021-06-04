@@ -1,0 +1,110 @@
+{% extends 'main.html' %} 
+{% load static %}
+{% block head %}
+<title>Aliases</title>
+{% endblock head %} 
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-5">
+      <form action="" id="groups_form" autocomplete="off">
+        <div class="input-group">
+        <label 
+          class="input-group-text"
+          for="groups_input">
+          Groups
+        </label>
+        <input
+          class="form-control search_input"
+          list="groups_datalist"
+          id="groups_input"
+          placeholder="Search Groups"
+          autocomplete="off"
+        />
+        <datalist id="groups_datalist">
+          {% for group in groups %}
+          <option value="{{ group.source }}" />
+          {% endfor %}  
+        </datalist>
+        <button class="btn btn-outline-primary" type="submit">Go</button>
+        </div>
+      </form>
+      <form class="mt-4" action="" id="forwards_form" autocomplete="off">
+        <div class="input-group">
+        <label 
+          class="input-group-text"
+          for="forwards_input">
+          Forwards
+        </label>
+        <input
+          class="form-control search_input"
+          list="forwards_datalist"
+          id="forwards_input"
+          placeholder="Search Forwards"
+          autocomplete="off"
+        />
+        <datalist id="forwards_datalist">
+          {% for forward in forwards %}
+          <option value="{{ forward.source }}" />
+          {% endfor %}  
+        </datalist>
+        <button class="btn btn-outline-primary" type="submit">Go</button>
+        </div>
+      </form>
+      
+    </div>
+    {% if destinations %}
+    <div class="col-md-7">
+      <table class="table table-sm table-striped">
+        <thead>
+          <tr>
+            <th>Destination</th>
+            <th>Actions</th>
+            <th>
+            <button
+                type="button" 
+                id="btn_new_email"
+                class="btn btn-outline-primary"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top" 
+                title="Add a new Email"
+              >
+                <i class="fas fa-plus"></i>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for destination in destinations %}
+          <tr>
+            <td>{{ destination }}</td>
+            <td colspan="2" class="text-center">
+              <button class="btn btn-outline-danger" type="button">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+      {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+  const groups_form = document.querySelector("#groups_form")
+  const forwards_form = document.querySelector("#forwards_form")
+  
+  search_action = (event) => {
+    event.preventDefault();
+    const groups_input = event.target.querySelector(".search_input")
+    location.href = `{% url 'sys_users:alias_by_domain' view.kwargs.domain_id %}${groups_input.value}`
+  }
+  groups_form.onsubmit = search_action
+  forwards_form.onsubmit = search_action
+</script>
+{% endblock js %}
+

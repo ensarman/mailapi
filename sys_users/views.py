@@ -15,7 +15,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from .models import Company, DomainAdmin
 from .forms import CompanyForm, CreateUserForm
 from virtual.forms import DomainForm, UserForm as EmailForm
-from virtual.models import Domain, User as Email
+from virtual.models import Domain, Alias, User as Email
 
 # Create your views here.
 
@@ -164,18 +164,10 @@ class ListEmailByDomain(LoginRequiredMixin, ListView):
         self.user = self.request.user.domainadmin
         self.companies = self.user.company.all()
         if self.companies.count() == 1:
-            # URL = reverse(
-            #     'sys_users:email_by_domain',
-            #     kwargs={
-            #         'company_id': self.companies[0].id,
-            #     }
-            # )
             self.kwargs = {
                 'company_id': self.companies[0].id,
                 'domain_id': self.companies[0].domain.all()[0].id,
             }
-            # return redirect(URL)
-
         return super(ListEmailByDomain, self).get(*args, **kwargs)
 
     def get_queryset(self):
@@ -342,3 +334,37 @@ def update_email(request):
             }
         )
     )
+
+
+class ListAliasByDomain(LoginRequiredMixin, ListView):
+    model = Alias
+    template_name = "sys_users/alias.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        aliases = self.model.objects.filter(
+            domain=self.kwargs['domain_id'])
+
+        #context['sources'] = sources
+
+        # divide alias and forwards
+        context['forwards'] = []
+        context['groups'] = []
+
+        for alias in aliases:
+            if alias.source in alias.destination.split(','):
+                context['forwards'] += [alias]
+            else:
+                context['groups'] += [alias]
+
+        if self.kwargs.get('source'):
+            context['destinations'] = self.model.objects.get(
+                source=self.kwargs.get('source')
+            ).destination.split(',')
+
+        return context
+
+    def get_queryset(self):
+
+        return super().get_queryset()

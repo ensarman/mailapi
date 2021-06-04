@@ -36,19 +36,49 @@
               >global users</a
             >
             <a class="dropdown-item" href="">global redirections</a>
-            <a class="dropdown-item" href="">global aliases</a>
-            {% else %}
+
+            {% else %} 
               {% for company in user.domainadmin.company.all %}
-                <a 
-                  class="dropdown-item" 
+                <a
+                  class="dropdown-item"
                   href="{% url 'sys_users:email_by_domain' company.id %}"
                 >
-                {{ company.name }}
+                  {{ company.name }}
                 </a>
-              {% endfor %}
-            {% block navbar %}
-            {% endblock %} 
+              {% endfor %} 
+              {% block navbar %} 
+              {% endblock %} 
             {% endif %}
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="AliasMagnamentDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Alias Magnament
+          </a>
+          <div class="dropdown-menu" aria-labelledby="AliasMagnamentDropdown">
+          {% if user.is_staff %}
+            <a class="dropdown-item" href="">global aliases</a>
+          {% else %} 
+            {% for company in user.domainadmin.company.all %} 
+              {% for domain in company.domain.all %}
+                <a
+                  class="dropdown-item"
+                  href="{% url 'sys_users:alias_by_domain' domain.id %}"
+                >
+                  {{ domain.name }}
+                </a>
+
+              {% endfor %}
+            {% endfor %} 
+          {% endif %}
           </div>
         </li>
         {% if user.is_staff %}

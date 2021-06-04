@@ -1,6 +1,5 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-from django.views.generic import DeleteView
 from .views import (
     LoginView,
     CompanyView,
@@ -8,10 +7,10 @@ from .views import (
     RemoveUser,
     RemoveEmail,
     ListEmailByDomain,
+    ListAliasByDomain,
     AddEmail,
     UpdateEmail
 )
-from virtual.models import User as Email
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name="login"),
@@ -36,6 +35,16 @@ urlpatterns = [
         'emails_by_domain/<int:company_id>/<int:domain_id>',
         ListEmailByDomain.as_view(),
         name="email_by_domain"
+    ),
+    path(
+        'alias_by_domain/<int:domain_id>/',
+        ListAliasByDomain.as_view(),
+        name="alias_by_domain"
+    ),
+    path(
+        'alias_by_domain/<int:domain_id>/<str:source>',
+        ListAliasByDomain.as_view(),
+        name="alias_by_domain"
     ),
     path(
         'add_email/<int:company_id>/<int:domain_id>/',
