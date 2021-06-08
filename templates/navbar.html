@@ -88,6 +88,23 @@
           >
         </li>
         {% endif %}
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="LogsMagnamentDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Logs
+          </a>
+
+          <div class="dropdown-menu" aria-labelledby="LogsMagnamentDropdown">
+            <a class="dropdown-item" href="{% url "logs:ban_log" %}">Ban Log</a>
+          </div>
+        </li>
       </ul>
       <ul class="navbar-nav">
         <li class="nav-item">

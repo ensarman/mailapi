@@ -26,5 +26,7 @@ urlpatterns = [
     path('api/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('sys_users/', include(('sys_users.urls', 'sys_users'), namespace="sys_users")),
     path('mail_manager/', include(('virtual.urls', 'virtual'), namespace="mail")),
-    path('', login_required(TemplateView.as_view(template_name='main.html')), name="home")
+    path('logs/', include(('logs.urls', 'logs'), namespace="logs")),
+    path('', login_required(TemplateView.as_view(
+        template_name='main.html')), name="home")
 ]

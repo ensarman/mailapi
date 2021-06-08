@@ -10,6 +10,7 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect
 from django.db import transaction
 from django.http import JsonResponse, Http404, HttpResponseForbidden
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView, UpdateView
 
 from .models import Company, DomainAdmin

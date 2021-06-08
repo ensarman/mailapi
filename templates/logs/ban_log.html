@@ -1,0 +1,33 @@
+{% extends 'main.html' %} 
+{% load static %}
+{% block head %}
+  <title>Ban Log</title>
+{% endblock head %}
+
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <table class="table table-sm table-hover">
+        <thead class="thead-dark align-middle text-center">
+          <tr>
+            <th colspan="11">
+              Ban log for today {% now "d-m-Y" %}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for line in day_log %}
+          <tr>
+            {% for element in line %}
+              <td>{{ element }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+</div>
+{% endblock body %}
