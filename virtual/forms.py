@@ -1,5 +1,5 @@
 from django import forms
-from django.forms.fields import EmailInput
+from django.forms.fields import EmailInput, ChoiceField
 from .models import User, Domain
 
 
@@ -23,7 +23,10 @@ class UserForm(forms.ModelForm):
                     'autocomplete': "nope",
                 }
             ),
-            'domain': forms.Select(attrs={'class': 'custom-select'}),
+            'domain': forms.Select(attrs={
+                'class': 'custom-select',
+
+            }),
             'quota': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Quota',

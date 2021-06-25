@@ -1,5 +1,10 @@
 {% extends 'main.html' %}
 {% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'choices/choices.min.css' %}">
+{% endblock %}
+
 {% block body %}
   <div class="container">
     <div class="row">
@@ -78,11 +83,29 @@
   </div>
 {% endblock %}
 {% block js %}
+  <script src="{% static 'choices/choices.min.js' %}"></script>
   <script src="{% static 'js/delete_modal.js' %}"></script>
+  <script>
+    const DomainSelect = document.querySelector('#{{ form.domain.auto_id }}')
+    const PlaceholderOption = document.createElement('option');
+    PlaceholderOption.innerHTML = "Select a Domain";
+    PlaceholderOption.value = "";
+    PlaceholderOption.disabled = true;
+    DomainSelect.appendChild(PlaceholderOption);
+
+    const DomainChoices = new Choices(
+      DomainSelect,
+      {
+        placeholderValue: "Select a domain",
+        searchPlaceholderValue: "Select a domain",
+      }
+    ); 
+    DomainChoices.setChoiceByValue("");
+  </script>
   <script>
     // TODO: arreglar cuando está mal escrito el dominio
     document.getElementById('{{ form.email.auto_id }}').addEventListener('change', e => {
-      const domain = document.getElementById('{{ form.domain.auto_id }}').selectedOptions[0].innerHTML
+      const domain = DomainSelect.selectedOptions[0].innerHTML
       const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
       if (!e.target.value.match(re))
         e.target.value = `${e.target.value}@${domain}`;
@@ -92,7 +115,7 @@
       }
     });
 
-    document.getElementById('{{ form.domain.auto_id }}').addEventListener('change', e => {
+    DomainSelect.addEventListener('change', e => {
       const email_input = document.getElementById('{{ form.email.auto_id }}');
       const [address, domain] = email_input.value.split('@');
       email_input.value = `${address}@${e.target.selectedOptions[0].innerHTML}`;
