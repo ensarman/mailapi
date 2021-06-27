@@ -28,12 +28,21 @@
 
       </div>
       <div class="row mt-2">
-        <div class="col-12">
+        <div class="col-md-3">
           <button
               class="btn btn-outline-primary btn-block"
               type="submit"
           >
             Nuevo usuario
+          </button>
+        </div>
+        <div class="col-md-3">
+          <button
+              class="btn btn-outline-secondary btn-block"
+              type="button"
+              id="btn_gen_password"
+          >
+            Random password
           </button>
         </div>
       </div>
@@ -85,16 +94,31 @@
 {% block js %}
   <script src="{% static 'choices/choices.min.js' %}"></script>
   <script src="{% static 'js/delete_modal.js' %}"></script>
+  <script src="{% static 'js/pwgen.js' %}"></script>
+
   <script>
-    const DomainSelect = document.querySelector('#{{ form.domain.auto_id }}')
+  const domain_select = document.querySelector('#{{ form.domain.auto_id }}')
+  const password_input = document.querySelector('#{{ form.password.auto_id }}')
+  const btn_gen_password = document.querySelector('#btn_gen_password')
+  </script>
+    
+  <script>
+    btn_gen_password.onclick = () => {
+      password_input.value = pwgen(15);
+      password_input.type = "text";
+    };
+  </script>
+
+  <script>
+    // colocar el placeholder para el combo
     const PlaceholderOption = document.createElement('option');
     PlaceholderOption.innerHTML = "Select a Domain";
     PlaceholderOption.value = "";
     PlaceholderOption.disabled = true;
-    DomainSelect.appendChild(PlaceholderOption);
+    domain_select.appendChild(PlaceholderOption);
 
     const DomainChoices = new Choices(
-      DomainSelect,
+      domain_select,
       {
         placeholderValue: "Select a domain",
         searchPlaceholderValue: "Select a domain",
@@ -105,7 +129,7 @@
   <script>
     // TODO: arreglar cuando está mal escrito el dominio
     document.getElementById('{{ form.email.auto_id }}').addEventListener('change', e => {
-      const domain = DomainSelect.selectedOptions[0].innerHTML
+      const domain = domain_select.selectedOptions[0].innerHTML
       const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
       if (!e.target.value.match(re))
         e.target.value = `${e.target.value}@${domain}`;
@@ -115,7 +139,7 @@
       }
     });
 
-    DomainSelect.addEventListener('change', e => {
+    domain_select.addEventListener('change', e => {
       const email_input = document.getElementById('{{ form.email.auto_id }}');
       const [address, domain] = email_input.value.split('@');
       email_input.value = `${address}@${e.target.selectedOptions[0].innerHTML}`;

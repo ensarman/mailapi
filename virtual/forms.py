@@ -1,5 +1,4 @@
 from django import forms
-from django.forms.fields import EmailInput, ChoiceField
 from .models import User, Domain
 
 
@@ -45,5 +44,10 @@ class DomainForm(forms.ModelForm):
         model = Domain
         fields = {'name'}
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Domain'})
+            'name': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Domain'
+                }
+            )
         }
