@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from datetime import date
+from file_read_backwards import FileReadBackwards
 
 # Create your views here.
 
@@ -13,7 +14,7 @@ class BanLog(LoginRequiredMixin, TemplateView):
             *args, **kwargs)
 
         context['day_log'] = []
-        with open("/var/log/fail2ban.log", "r") as file:
+        with FileReadBackwards("/var/log/fail2ban.log") as file:
             for line in file:
                 log_date_string = line.split(" ")[0]
                 log_date = {
