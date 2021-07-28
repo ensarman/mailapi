@@ -20,7 +20,11 @@
         {% for line in day_log %}
           <tr>
             {% for element in line %}
-              <td>{{ element }}</td>
+              {% if element == "Ban" %}
+                <td class="table-danger"><b>{{ element }}</b></td>
+              {% else %}
+                <td>{{ element }}</td>
+              {% endif %}
             {% endfor %}
           </tr>
         {% endfor %}

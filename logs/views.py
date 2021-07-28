@@ -28,5 +28,8 @@ class BanLog(LoginRequiredMixin, TemplateView):
                     log_date['day']
                 )
                 if line_date == date.today():
-                    context['day_log'] += [line.split()]
+                    day_log = line.split()
+                    if (day_log[5] == "[dovecot]" or day_log[5] == "[postfix]") and (day_log[6] == "Ban" or day_log[6] == "Unban"):
+                        context['day_log'] += [day_log]
+
         return context
