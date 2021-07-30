@@ -1,5 +1,5 @@
-from django.urls import path, reverse, reverse_lazy
-from django.views.generic import DeleteView, CreateView, ListView
+from django.urls import path, reverse_lazy
+from django.views.generic import DeleteView, CreateView
 from .views import BaseList, user_detail_json, CreateEmail
 from .models import User, Domain, Alias
 from .forms import UserForm, DomainForm

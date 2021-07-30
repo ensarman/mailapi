@@ -33,3 +33,20 @@ const restrict_to_numbers = () => {
     }
 }
 
+// fixes the email putting the corresponding domain
+const fix_domain = (input, domain) => {
+    // input must be an input form  DOM element
+    input.onchange = (e) => {
+        //const domain = domain;
+        const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+        if (e.target.value == `@${domain}`){
+          e.target.value = `@${domain}`;
+        }
+        else if (!e.target.value.match(re))
+          e.target.value = `${e.target.value}@${domain}`;
+        else{
+          const address = e.target.value.split('@')[0];
+          e.target.value = `${address}@${domain}`;
+        }
+      };
+}

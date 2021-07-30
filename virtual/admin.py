@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Domain, User as Email
+from .models import Alias, Domain, User as Email
 
 # Register your models here.
 
@@ -12,3 +12,8 @@ class DomainAdmin(admin.ModelAdmin):
 @admin.register(Email)
 class EmailAdmin(admin.ModelAdmin):
     list_display = ('id', 'email', 'quota')
+
+
+@admin.register(Alias)
+class AliasAdmin(admin.ModelAdmin):
+    list_display = ('id', 'source', 'destination')

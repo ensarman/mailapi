@@ -9,7 +9,9 @@ from .views import (
     ListEmailByDomain,
     ListAliasByDomain,
     AddEmail,
-    UpdateEmail
+    UpdateEmail,
+    GetEmails,
+    AddSourceAlias
 )
 
 urlpatterns = [
@@ -56,5 +58,10 @@ urlpatterns = [
         'remove_email/<int:company_id>/<int:domain_id>/<int:pk>',
         RemoveEmail.as_view(), name='remove_email'
     ),
-    #   path()
+    path(
+        'get_emails', GetEmails.as_view(), name="get_emails"
+    ),
+    path(
+        'add_alias_source', AddSourceAlias.as_view(), name="add_alias_source"
+    )
 ]

@@ -6,11 +6,11 @@ from django.views.generic import ListView, DeleteView
 
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.db import transaction
-from django.http import JsonResponse, Http404, HttpResponseForbidden
-from django.views.generic.base import TemplateView
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.generic.base import View
 from django.views.generic.edit import CreateView, UpdateView
 
 from .models import Company, DomainAdmin
@@ -356,14 +356,32 @@ class ListAliasByDomain(LoginRequiredMixin, ListView):
 
         for alias in aliases:
             if alias.source in alias.destination.split(','):
-                context['forwards'] += [alias]
+                context['forwards'] += [alias.source]
             else:
-                context['groups'] += [alias]
+                context['groups'] += [alias.source]
 
         if self.kwargs.get('source'):
-            context['destinations'] = self.model.objects.get(
-                source=self.kwargs.get('source')
-            ).destination.split(',')
+            source = self.kwargs.get('source')
+            try:
+                context['destinations'] = self.model.objects.get(
+                    source=source
+                ).destination.split(',')
+
+                if source in context['forwards']:
+                    context['is_forward'] = True
+                elif source in context['groups']:
+                    context['is_group'] = True
+            except Exception as e:
+                context['error'] = {
+                    'error': e,
+                    'message': "the address does not exists"
+                }
+
+        context['current_domain'] = Domain.objects.get(
+            id=self.kwargs['domain_id'])
+
+        context['emails'] = Email.objects.filter(
+            domain_id=self.kwargs['domain_id'])
 
         return context
 
@@ -377,3 +395,54 @@ class ListAliasByDomain(LoginRequiredMixin, ListView):
             return HttpResponseForbidden()
         else:
             return super().get(request, *args, **kwargs)
+
+
+class AddSourceAlias(LoginRequiredMixin, CreateView):
+    model = Alias
+    fields = ("source", 'domain')
+
+    @transaction.atomic
+    def post(self, request):
+        comapnies = request.user.domainadmin.company.all()
+        allowed_domains = []
+        for company in comapnies:
+            for domain in company.domain.all():
+                allowed_domains.append(domain)
+
+        request_domain = Domain.objects.get(
+            id=request.POST.get('domain'))
+
+        response_json = {
+            'status': 'unknown',
+            'comment': 'unknown'
+        }
+
+        if (request_domain and request_domain in allowed_domains):
+            #request.POST['domain'] = request.POST.get('domain_id')
+            form = self.get_form()
+            if form.is_valid():
+                object = form.save()
+                response_json['status'] = 'success'
+                response_json['comment'] = object.source
+            else:
+                response_json['status'] = 'error'
+                response_json['comment'] = form.errors
+        else:
+            response_json['status'] = 'error'
+            response_json['comment'] = 'bad domain or not allowed'
+
+        return (JsonResponse(response_json))
+
+
+class GetEmails(LoginRequiredMixin, View):
+
+    def post(self, request):
+        domain_id = request.POST.get('domain_id')
+        emails = Email.objects.filter(
+            domain_id=domain_id).values('email')
+
+        emails = tuple(emails)
+
+        # emails_serialized = serializers.serialize('json', emails)
+        # return HttpResponse(emails_serialized, content_type="application/json")
+        return JsonResponse(emails, safe=False)
