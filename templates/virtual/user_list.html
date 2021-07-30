@@ -95,6 +95,7 @@
   <script src="{% static 'choices/choices.min.js' %}"></script>
   <script src="{% static 'js/delete_modal.js' %}"></script>
   <script src="{% static 'js/pwgen.js' %}"></script>
+  <script src="{% static 'js/validations.js' %}"></script>
 
   <script>
   const domain_select = document.querySelector('#{{ form.domain.auto_id }}')
@@ -127,17 +128,8 @@
     DomainChoices.setChoiceByValue("");
   </script>
   <script>
-    // TODO: arreglar cuando está mal escrito el dominio
-    document.getElementById('{{ form.email.auto_id }}').addEventListener('change', e => {
-      const domain = domain_select.selectedOptions[0].innerHTML
-      const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-      if (!e.target.value.match(re))
-        e.target.value = `${e.target.value}@${domain}`;
-      else{
-        const address = e.target.value.split('@')[0];
-        e.target.value = `${address}@${domain}`;
-      }
-    });
+    // TODO: Verificar el chices que no actualiza el select
+    fix_domain(document.getElementById('{{ form.email.auto_id }}'),domain_select.selectedOptions[0].innerHTML)
 
     domain_select.addEventListener('change', e => {
       const email_input = document.getElementById('{{ form.email.auto_id }}');

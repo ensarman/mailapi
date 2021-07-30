@@ -195,6 +195,7 @@
   <script src="{% static 'js/delete_modal.js' %}"></script>
   <script src="{% static 'js/search.js' %}"></script>
   <script src="{% static 'js/pwgen.js' %}"></script>
+  <script src="{% static 'js/validations.js' %}"></script>
 
   <script>
       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -241,20 +242,8 @@
     };
 
     // fixes the email putting the corresponding domain
-    document.getElementById('{{ view.email_form.email.auto_id }}')
-      .addEventListener('change', e => {
-        const domain = "{{ current_domain.name }}";
-        const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-        if (e.target.value == `@${domain}`){
-          e.target.value = `@${domain}`;
-        }
-        else if (!e.target.value.match(re))
-          e.target.value = `${e.target.value}@${domain}`;
-        else{
-          const address = e.target.value.split('@')[0];
-          e.target.value = `${address}@${domain}`;
-        }
-      });
+    fix_domain(document.getElementById('{{ view.email_form.email.auto_id }}'), "{{ current_domain.name }}")
+    
     check_show_password.onclick = (event) => {
       //let password_input = document.getElementById('{{ view.email_form.password.auto_id }}')
       if ({{ view.email_form.password.auto_id }}.type === "password"){
