@@ -13,7 +13,8 @@ from .views import (
     GetEmails,
     AddSourceAlias,
     RemoveAlias,
-    AddDestAlias
+    AddDestAlias,
+    RemoveDestAlias
 )
 
 urlpatterns = [
@@ -71,6 +72,8 @@ urlpatterns = [
     ),
     path('add_alias_destination/<int:pk>', AddDestAlias.as_view(),
          name="add_alias_destination"),
+    path('remove_alias_destination/<int:pk>',
+         RemoveDestAlias.as_view(), name="remove_alias_destination"),
     # AJAX METHODS
     path(  # ajax para retornar todos los emails, dominio via POST
         'get_emails', GetEmails.as_view(), name="get_emails"

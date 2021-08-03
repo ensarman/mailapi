@@ -477,8 +477,38 @@ class AddDestAlias(LoginRequiredMixin, View):
                 response_json['comment'] = alias.destination
             except Exception as e:
                 response_json['status'] = "error"
-                response_json['comment'] = "no se pudo guardar"
+                response_json['comment'] = "can't sava"
                 response_json['exeception'] = e.__str__()
+
+        return JsonResponse(response_json)
+
+
+class RemoveDestAlias(LoginRequiredMixin, View):
+    @transaction.atomic
+    def post(self, request, pk):
+        destination = request.POST.get('destination')
+        alias = Alias.objects.get(pk=pk)
+        response_json = {
+            'status': '',
+            'comment': ''
+        }
+
+        dest = alias.destination.split(",")
+        try:
+            dest.remove(destination)
+            try:
+                alias.destination = ','.join(dest)
+                alias.save()
+                response_json['status'] = "success"
+                response_json['comment'] = alias.destination
+            except Exception as e:
+                response_json['status'] = "error"
+                response_json['comment'] = "can't save"
+                response_json['exeception'] = e.__str__()
+        except ValueError as e:
+            response_json['status'] = "error"
+            response_json['comment'] = f"the e-mail {destination} doesn't exist"
+            response_json['exeception'] = e.__str__()
 
         return JsonResponse(response_json)
 

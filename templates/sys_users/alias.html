@@ -119,7 +119,11 @@
           <tr>
             <td>{{ destination }}</td>
             <td colspan="2" class="text-center">
-              <button class="btn btn-outline-danger" type="button">
+              <button 
+                class="btn btn-outline-danger btn_remove_dest" 
+                type="button"
+                destination="{{ destination }}"
+              >
                 <i class="fas fa-trash"></i>
               </button>
             </td>
@@ -450,6 +454,34 @@ const get_emails = async() =>{
     bsmodal.show()
   }
 </script>
+
+<script>
+//removes a destination
+  buttons = document.querySelectorAll('.btn_remove_dest')  
+  for (del_button of buttons){
+    del_button.onclick = (e) => {
+      form_data = new FormData()
+      form_data.append('csrfmiddlewaretoken', csrftoken);
+      btn = find_parent('BUTTON', e.target)
+      form_data.append('destination', btn.getAttribute('destination'));
+      options = {
+        method: 'POST',
+        body: form_data
+      }
+      fetch(`{% url 'sys_users:remove_alias_destination' alias.id %}`, options)
+      .then(response => response.json())
+      .then(data => {
+        if(data.status === "success"){
+          console.log(data.comment);
+        }else{
+          alert(`error \n ${data.comment}`)
+        }
+      })
+    }
+  }
+</script>
+
+
 {% endif %}
 {% endblock js %}
 
