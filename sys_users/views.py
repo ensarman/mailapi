@@ -363,9 +363,12 @@ class ListAliasByDomain(LoginRequiredMixin, ListView):
         if self.kwargs.get('source'):
             source = self.kwargs.get('source')
             try:
-                context['destinations'] = self.model.objects.get(
+                alias = self.model.objects.get(
                     source=source
-                ).destination.split(',')
+                )
+                context['alias'] = alias
+                context['source'] = source
+                context['destinations'] = alias.destination.split(',')
 
                 if source in context['forwards']:
                     context['is_forward'] = True
@@ -418,10 +421,15 @@ class AddSourceAlias(LoginRequiredMixin, CreateView):
         }
 
         if (request_domain and request_domain in allowed_domains):
-            #request.POST['domain'] = request.POST.get('domain_id')
+            # request.POST['domain'] = request.POST.get('domain_id')
             form = self.get_form()
             if form.is_valid():
                 object = form.save()
+
+                if request.POST.get('type') == 'forward':
+                    object.destination = object.source
+                    object.save()
+
                 response_json['status'] = 'success'
                 response_json['comment'] = object.source
             else:
@@ -432,6 +440,47 @@ class AddSourceAlias(LoginRequiredMixin, CreateView):
             response_json['comment'] = 'bad domain or not allowed'
 
         return (JsonResponse(response_json))
+
+
+class RemoveAlias(LoginRequiredMixin, DeleteView):
+    model = Alias
+
+    def get_success_url(self):
+        return reverse_lazy('sys_users:alias_by_domain', kwargs={
+            'domain_id': self.kwargs.get('domain_id')
+        })
+
+
+class AddDestAlias(LoginRequiredMixin, View):
+
+    @transaction.atomic
+    def post(self, request, pk):
+        # pk = self.kwargs.get('pk')
+        destination = request.POST.get('destination')
+        alias = Alias.objects.get(pk=pk)
+        prev_dest = alias.destination.split(",")
+        response_json = {
+            "status": "",
+            "comment": ""
+        }
+
+        if destination in prev_dest:
+            response_json['status'] = 'error'
+            response_json['comment'] = 'destination already set'
+        else:
+            prev_dest.append(destination)
+            new_dest = ','.join(prev_dest)
+            try:
+                alias.destination = new_dest
+                alias.save()
+                response_json['status'] = "success"
+                response_json['comment'] = alias.destination
+            except Exception as e:
+                response_json['status'] = "error"
+                response_json['comment'] = "no se pudo guardar"
+                response_json['exeception'] = e.__str__()
+
+        return JsonResponse(response_json)
 
 
 class GetEmails(LoginRequiredMixin, View):

@@ -83,8 +83,16 @@
         {% elif is_forward %}
         Forward 
         {% endif %}
-        {{ view.kwargs.source }}
-      </h2>
+        {{ alias.source }}
+        <button 
+          class="btn btn-outline-danger"
+          type="button"
+          id="button_delete_alias"
+        >
+                <i class="fas fa-trash"></i>
+        </button>
+      </h4>
+
       
       <table class="table table-sm table-striped">
         <thead>
@@ -94,7 +102,7 @@
             <th>
             <button
                 type="button" 
-                id="btn_new_email"
+                id="button_new_destination"
                 class="btn btn-outline-primary"
                 data-bs-toggle="tooltip"
                 data-bs-placement="top" 
@@ -107,6 +115,7 @@
         </thead>
         <tbody>
         {% for destination in destinations %}
+          {% if destination != alias.source %}
           <tr>
             <td>{{ destination }}</td>
             <td colspan="2" class="text-center">
@@ -115,6 +124,7 @@
               </button>
             </td>
           </tr>
+          {% endif %}
       {% endfor %}
         </tbody>
       </table>
@@ -128,19 +138,20 @@
 <script src="{% static 'js/find_button.js' %}"></script>
 <script src="{% static 'js/validations.js' %}"></script>
 <script src="{% static 'js/get_cookie.js' %}"></script>
+<script src="{% static 'js/delete_modal.js' %}"></script>
 <script>
+  const csrftoken = getCookie('csrftoken');
   const groups_form = document.querySelector("#groups_form")
   const forwards_form = document.querySelector("#forwards_form")
   const forwards_input = document.querySelector("#forwards_input")
   const groups_input = document.querySelector("#groups_input")
-  const button_add_group = document.querySelector("#button_add_group")
-  const button_add_forward = document.querySelector("#button_add_forward")
+  
   
   // send the search form
   const search_action = (event) => {
     event.preventDefault();
-
-    const input = event.target.parentNode.querySelector(".search_input")
+    parent_form = find_parent('FORM', event.target)
+    const input = parent_form.querySelector(".search_input")
     location.href = `{% url 'sys_users:alias_by_domain' view.kwargs.domain_id %}${input.value}`
   }
 
@@ -149,17 +160,11 @@
   groups_form.onsubmit = search_action
   forwards_form.onsubmit = search_action
 
-  // shows a modal to add a group or forward
-  const add_group_forward = (event) => {
-    let title = "";
-    let is_groups = false;
-    const form = find_parent("FORM", event.target);
-    (form.id === "groups_form") 
-      ? is_groups = true 
-      : is_groups = false;
+</script>
 
-
-    const modal = document.createElement("div");
+<script>
+const create_modal = (title) => {
+  const modal = document.createElement("div");
     modal.id = "modal"
     modal.setAttribute("tabindex", '-1')
     modal.setAttribute('class', 'modal fade')
@@ -168,7 +173,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Add a new ${is_groups? "group" : "forward"}</h5>
+            <h5 class="modal-title">Add a new ${title}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form>
@@ -188,39 +193,95 @@
             </div>
             <div class="modal-footer">
               <button id="button_close" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button id="button_send" type="button" class="btn btn-primary">New ${is_groups? "group" : "forward"}</button>
+              <button id="button_send" type="button" class="btn btn-primary">New ${title}</button>
             </div>
           </form>
         </div>
       </div>
-    `;
+    `.trim();
 
-    //fixes domain in input
+    const email_input = modal.querySelector('#input_new_group_forward')
+    email_input.onfocus = (e) => {
+        // Removes the error message
+        const error_message = modal_body.querySelector('#error_message');;
+        if (error_message){
+          e.target.value = "";
+          error_message.remove();
+        }
+    }
+    modal.addEventListener('hidden.bs.modal', (event) => {
+      event.target.remove()
+  })
+  return modal
+}
+
+const set_modal_error_message = (modal_body, message) => {
+  const message_p = document.createElement('p');
+  message_p.id = "error_message"
+  message_p.classList.add('text-danger');
+  message_p.classList.add('text-center');
+  message_p.innerHTML = message
+  modal_body.appendChild(message_p)
+  
+  return message_p
+}
+
+const get_emails = async() =>{
+  // async function to get a list of emails
+  const formData = new FormData();
+  formData.append('domain_id', '{{ view.kwargs.domain_id }}' )
+  formData.append('csrfmiddlewaretoken', csrftoken)
+  let email_list = [];
+  const options = 
+    {
+      method: 'POST',
+      body: formData 
+    }
+  await fetch("{% url 'sys_users:get_emails' %}", options)
+    .then(response => response.json())
+    .then(data => {
+      for(element of data){
+        email_list.push(element.email);
+      }
+    });
+  return  email_list;
+}
+</script>
+
+<script>
+  const button_add_group = document.querySelector("#button_add_group")
+  const button_add_forward = document.querySelector("#button_add_forward")
+
+  // shows a modal to add a group or forward
+  const add_group_forward = (event) => {
+    let title = "";
+    let is_groups = false;
+    const form = find_parent("FORM", event.target);
+    (form.id === "groups_form") 
+      ? is_groups = true 
+      : is_groups = false;
+
+    modal = create_modal(is_groups? "group" : "forward");
+
     const email_input = modal.querySelector("#input_new_group_forward")
     const email_input_list = modal.querySelector("#emails_datalist")
     const button_send = modal.querySelector("#button_send");
-    const button_closa = modal.querySelector("#button_close");
     const modal_body = modal.querySelector("#modal_body");
-
+    
+    //fixes domain in input
     fix_domain(email_input, "{{ current_domain.name }}");
     
     const bsmodal = new bootstrap.Modal(modal, {backdrop: 'static'});
     
-    modal.addEventListener('hidden.bs.modal', (event) => {
-      event.target.remove()
-      
-    })
     
 
-
-    const csrftoken = getCookie('csrftoken');
-
-    const send_data = (e) => {
+    const send_data = (type) => {
       // method to send data to the server
       const formData = new FormData();
       formData.append('source', email_input.value)
       formData.append('domain', '{{ view.kwargs.domain_id }}' )
       formData.append('csrfmiddlewaretoken', csrftoken)
+      formData.append('type', type)
 
       const options = {
         method: 'POST',
@@ -230,74 +291,165 @@
       fetch("{% url 'sys_users:add_alias_source' %}", options)
         .then(response => response.json())
         .then(data => {
-          // TODO si hay estado success, redireccionar a la edicion de la redireccion
-          // si es redireccion agregar el mismo correo al destination
-          // si hay error mostrarlo en el modal
-          console.log(data)
+          if (data.status === "success"){
+            location.href = `{% url 'sys_users:alias_by_domain' view.kwargs.domain_id %}${data.comment}`
+          }
+          else {
+            set_modal_error_message(modal_body, data.comment);
+          }
         })
 
     }
 
-    if (!is_groups){
-      email_input.disabled = true;
-      const formData = new FormData();
-      formData.append('domain_id', '{{ view.kwargs.domain_id }}' )
-      formData.append('csrfmiddlewaretoken', csrftoken)
-      let email_list = []
-
-      const options = 
-        {
-          method: 'POST',
-          body: formData 
-        }
-      
-      fetch("{% url 'sys_users:get_emails' %}", options)
-        .then(response => response.json())
-        .then(data => {
-          for(element of data){
-            email_list.push(element.email);
-            const option = document.createElement('option');
-            option.setAttribute('value', element.email);
-            email_input_list.appendChild(option);
-            email_input.disabled = false;
+    if (is_groups){
+      get_emails().
+        then(email_list => {
+          button_send.onclick = (e) => {
+            if (email_list.includes(email_input.value)){
+              set_modal_error_message(modal_body, "The given group is an email, can not be a group");
+            }
+            else{
+              send_data('group');
+            }
           }
-        });
+        })
       
-      button_send.onclick = (e) => {
-        if (email_list.includes(email_input.value)){
-          send_data();
-        }
-        else{
-          // adds a message if the email doesn't exists
-          const message = document.createElement('p');
-          message.id = "error_message"
-          message.classList.add('text-danger');
-          message.classList.add('text-center');
-          message.innerHTML = "The given email doesn't exist"
-          modal_body.appendChild(message)
-        }
-      }
-
-      
-      email_input.onfocus = (e) => {
-        // Removes the error message
-        e.target.value = "";
-        const message = modal_body.querySelector('#error_message');;
-        if (message){
-          message.remove();
-        }
-      }
     }
-    
-    
+    else {
+      // if is forward
+      email_input.disabled = true;
+      
+      get_emails()
+        .then(email_list => {
+          for(email of email_list){
+            const option = document.createElement('option');
+            option.setAttribute('value', email);
+            email_input_list.appendChild(option);
+            
+          }
+
+          email_input.disabled = false;
+
+          button_send.onclick = (e) => {
+            if (email_list.includes(email_input.value)){
+              send_data('forward');
+            }
+            else{
+              // adds a message if the email doesn't exists
+              set_modal_error_message(modal_body, "The given email doesn't exist");
+            }
+          }
+        })
+    }
+
     bsmodal.show();
-    
-    
   }
 
 
   button_add_group.onclick = add_group_forward;
   button_add_forward.onclick = add_group_forward;
 </script>
+
+{% if alias %}
+<script>
+  // delete alias
+  const button_delete_alias = document.querySelector('#button_delete_alias');
+  button_delete_alias.onclick = (e) => {
+    // shows the confirmation modal and deletes the alias
+    get_modal("{{ alias.pk }}", "{{ alias.source }}", "{% url "sys_users:remove_alias" view.kwargs.domain_id alias.pk %}", csrftoken )
+  }
+
+</script>
+
+<script>
+  // TODO:  hacer la funcionalidad de la creacion de las nuevas destinations
+  const button_new_destination = document.querySelector("#button_new_destination")
+
+  
+
+  button_new_destination.onclick = (event) => {
+    modal = create_modal("destination")
+    const email_input = modal.querySelector("#input_new_group_forward")
+    const button_send = modal.querySelector("#button_send");
+    const modal_body = modal.querySelector("#modal_body");
+    const email_input_list = modal.querySelector("#emails_datalist")
+    const bsmodal = new bootstrap.Modal(modal, {backdrop: 'static'});
+
+    const send_destination = () => {
+      const form_data = new FormData();
+      form_data.append('destination', email_input.value);
+      form_data.append('csrfmiddlewaretoken', csrftoken);
+
+      const options = {
+        method: "POST",
+        body: form_data
+      }
+
+      fetch('{% url 'sys_users:add_alias_destination' alias.id %}', options)
+          .then(response => response.json())
+          .then(data => {
+            button_send.disabled = false;
+            email_input.readOnly = false;
+            if (data.status === "success"){
+              location.reload();
+              return false;
+            }
+            else{
+              set_modal_error_message(modal_body, data.comment);
+              }
+          });
+    }
+
+    {% if is_group %}
+      //fixes domain in input
+      fix_domain(email_input, "{{ current_domain.name }}");
+      email_input.disabled = true;
+      
+      get_emails()
+      .then(email_list => {
+        for(email of email_list){
+            const option = document.createElement('option');
+            option.setAttribute('value', email);
+            email_input_list.appendChild(option);
+            
+        }
+        email_input.disabled = false;
+        button_send.onclick = (e) => {
+          send_destination()
+        }    
+      })
+    {% else %}
+      get_emails()
+      .then(email_list => {
+        for(email of email_list){
+            const option = document.createElement('option');
+            option.setAttribute('value', email);
+            email_input_list.appendChild(option);
+            
+        }
+        email_input.disabled = false;
+        button_send.onclick = (e) => {
+          button_send.disabled = true;
+          email_input.readOnly = true;
+
+          if (validate_email(email_input)){
+            send_destination()
+          }
+          else{
+            button_send.disabled = false;
+            email_input.readOnly = false;
+            set_modal_error_message(modal_body, "It is a not valid Email");
+          }
+        }    
+      })
+
+
+        
+    {% endif %}
+
+    bsmodal.show()
+  }
+</script>
+{% endif %}
 {% endblock js %}
 

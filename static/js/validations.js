@@ -50,3 +50,11 @@ const fix_domain = (input, domain) => {
         }
       };
 }
+
+const validate_email = (input) =>{
+  //input.onchange = (e)  =>{
+    const re = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    const result = input.value.match(re);
+    return result;
+  //}
+}
