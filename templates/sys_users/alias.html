@@ -446,9 +446,6 @@ const get_emails = async() =>{
           }
         }    
       })
-
-
-        
     {% endif %}
 
     bsmodal.show()
@@ -456,7 +453,8 @@ const get_emails = async() =>{
 </script>
 
 <script>
-//removes a destination
+  //Removes a destination 
+  //TODO: agregar modal de confirmacion al borrar
   buttons = document.querySelectorAll('.btn_remove_dest')  
   for (del_button of buttons){
     del_button.onclick = (e) => {
@@ -472,7 +470,8 @@ const get_emails = async() =>{
       .then(response => response.json())
       .then(data => {
         if(data.status === "success"){
-          console.log(data.comment);
+          location.reload();
+          return false;
         }else{
           alert(`error \n ${data.comment}`)
         }
