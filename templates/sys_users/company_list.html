@@ -123,16 +123,24 @@
             </div>
             <hr />
             <form method="post" class="row">
+              {% csrf_token %}
+              <input type="hidden" name="form" value="company_quota">
               <div class="col-6">
-                <h5>Quota Total</h3>
+                <h5>Quota Total</h5>
               </div>
               <div class="col-4">
-                <input class="form-control restrict-numbers" type="text" value={{ company.quota_total | btogb:True }}>
+                <input 
+                  class="form-control restrict-numbers" 
+                  type="text" 
+                  name="quota_total"
+                  value={{ company.quota_total | btogb:True }}
+                >
               </div>
               <div class="col-2">
                 <button class="btn btn-success" type="submit"><i class="fas fa-check"></i></button>
               </div>
-            </div>
+            </form>
+            
             <hr />
             <div class="row">
               <div class="col-8">
@@ -149,24 +157,24 @@
                 </button>
               </div>
             </div>
-                <form id="new-domain-form" class="row d-none mt-3" action="" method="post">
-                  {% csrf_token %}
-                  <input type="hidden" name="company_id" value="{{ company.id }}">
-                  <input type="hidden" name="form" value="domain">
-                  <div class="row">
-                    <div class="d-flex col-4 align-items-center">
-                      <label class="m-0" for="{{ domain_form.name.auto_id }}">{{ domain_form.name.label }}</label>
-                    </div>
-                    <div class="col-6">
-                      {{ domain_form.name }}
-                    </div>
-                    <div class="col-2">
-                      <button class="btn btn-outline-success" type="submit">
-                        <i class="fas fa-check"></i>
-                      </button>
-                    </div>
+              <form id="new-domain-form" class="row d-none mt-3" action="" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="company_id" value="{{ company.id }}">
+                <input type="hidden" name="form" value="domain">
+                <div class="row">
+                  <div class="d-flex col-4 align-items-center">
+                    <label class="m-0" for="{{ domain_form.name.auto_id }}">{{ domain_form.name.label }}</label>
                   </div>
-                </form>
+                  <div class="col-6">
+                    {{ domain_form.name }}
+                  </div>
+                  <div class="col-2">
+                    <button class="btn btn-outline-success" type="submit">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </div>
+                </div>
+              </form>
 
             <div class="row text-danger">{{ domain_form.errors }}</div>
             <div class="row mt-3">

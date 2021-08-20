@@ -104,8 +104,9 @@ class CompanyView(LoginRequiredMixin, ListView):
                 context = self.get_context_data()
                 context['user_form'] = form
                 return self.render_to_response(context)
+
         elif self.request.POST.get('form') == 'company':
-            """ si es que se ejecuta crear nueva comañia """
+            """ si es que se ejecuta crear nueva compañia """
             form = CompanyForm(self.request.POST)
             if form.is_valid():
                 company = form.save()
@@ -119,6 +120,16 @@ class CompanyView(LoginRequiredMixin, ListView):
                 context = self.get_context_data()
                 context['company_form'] = form
                 return self.render_to_response(context)
+
+        elif self.request.POST.get('form') == 'company_quota':
+            """ si se llama al formulario para quota total"""
+
+            company = Company.objects.get(pk=self.kwargs.get('company_id'))
+            quota_total = int(self.request.POST.get('quota_total'))
+            company.quota_total = quota_total
+            company.save()
+
+            return redirect('sys_users:company', self.kwargs.get('company_id'))
 
 
 @method_decorator(staff_member_required, name='dispatch')
