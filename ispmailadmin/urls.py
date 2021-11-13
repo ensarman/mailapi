@@ -27,6 +27,7 @@ urlpatterns = [
     path('sys_users/', include(('sys_users.urls', 'sys_users'), namespace="sys_users")),
     path('mail_manager/', include(('virtual.urls', 'virtual'), namespace="mail")),
     path('logs/', include(('logs.urls', 'logs'), namespace="logs")),
+    path('reports/', include(('reports.urls', 'reports'), namespace='reports')),
     path('', login_required(TemplateView.as_view(
         template_name='main.html')), name="home")
 ]

@@ -76,6 +76,9 @@ class User(models.Model):
             """Only enters here only if the user exists"""
             storage_quota = dovehttp.get_quota(user=self.email)
             self.quota_used = int(storage_quota['value'])
+            self.quota_used_gb = round(
+                self.quota_used / settings.KILOBYTE_TO_GIGABYTE_FACTOR, 2
+            )
             self.quota_percent = int(storage_quota['percent'])
 
     def __str__(self):

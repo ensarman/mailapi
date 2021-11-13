@@ -123,7 +123,21 @@
           </tbody>
         </table>
         </form>
-      {% include 'pagination.html' %}
+      <div class="container">
+        <div class="row">
+          <div class="col-md-10">
+            {% include 'pagination.html' %}
+          </div>
+          <div class="col-md-2">
+            <a class="btn btn-primary" href="{% url 'reports:accounts_report' domain_id=current_domain.id format='csv' %}">
+              <i class="fas fa-file-csv"></i>
+            </a>
+            <button class="btn btn-primary">
+              <i class="fas fa-file-excel"></i>
+            </button>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
     {% endif %}

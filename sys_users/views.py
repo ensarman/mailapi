@@ -18,6 +18,7 @@ from .forms import CompanyForm, CreateUserForm
 from virtual.forms import DomainForm, UserForm as EmailForm
 from virtual.models import Domain, Alias, User as Email
 
+
 # Create your views here.
 
 
