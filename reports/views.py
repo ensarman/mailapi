@@ -31,7 +31,8 @@ class AccountsReport(View, LoginRequiredMixin):
                         'Content-Disposition': 'attachment; filename="report.csv"'
                     },
                 )
-                writer = csv.writer(response)
+                writer = csv.writer(
+                    response, dialect=csv.excel, delimiter=';',)
                 writer.writerow(
                     ['User', 'Domain', 'Quota Assigned', 'Quota Used', 'Quota %'])
                 users = request_domain.user_set.all()
