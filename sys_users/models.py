@@ -38,6 +38,9 @@ class Company(models.Model):
     def get_domains(self):  # este es para el admin
         return '\n'.join([domain.name for domain in self.domain.all()])
 
+    def quota_totalgb(self):
+        return self.quota_total / settings.BYTE_TO_GIGABYTE_FACTOR
+
     def get_used_quota(self):
         """returns quota used by the domain
 
@@ -48,6 +51,17 @@ class Company(models.Model):
         for domain in self.domain.all():
             self.all_quota += domain.get_quota()
         return self.all_quota
+
+    def get_used_quotagb(self):
+        """returns quota used by the domain
+
+        Returns:
+            int: quota used by the domain
+        """
+        self.all_quota = 0
+        for domain in self.domain.all():
+            self.all_quota += domain.get_quota()
+        return self.all_quota / settings.BYTE_TO_GIGABYTE_FACTOR
 
     def get_percnet_used_quota(self):
         return (self.get_used_quota() / self.quota_total) * 100

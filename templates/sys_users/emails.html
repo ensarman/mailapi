@@ -14,15 +14,32 @@
           {% for company in companies %}
             <a
                 href="{% url 'sys_users:email_by_domain' company.id %}"
-                class="list-group-item list-group-item-action"
+                class="list-group-item list-group-item-action list-group-item-dark"
             >
               {{ company.name }}
             </a>
-            <span class="list-group-item">
-              {{ company.get_percnet_used_quota }}%
+            <span class="list-group-item list-group-item-action">
+                Reserved quota
+              <span class="small fw-bold">
+                {{ company.quota_totalgb }} GB
+              </span>
+            </span>
+            <span class="list-group-item list-group-item-action">
+                Used quota
+              <span class="small fw-bold">
+                {{ company.get_used_quotagb }} GB
+              </span>
+            </span>
+            <span class="list-group-item list-group-item-action">
+              Used Quota percent
+              <span class="small fw-bold">
+                {{ company.get_percnet_used_quota }} %
+              </span>
             </span>
           {% endfor %}
+          
         </div>
+        
       </div>
     </div>
     {% if domains %}
