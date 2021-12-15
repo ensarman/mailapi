@@ -18,6 +18,8 @@ class Company(models.Model):
             ),
         )
     )
+    start_date = models.DateField(
+        auto_now_add=True, null=True, blank=True)
     domain = models.ManyToManyField("virtual.Domain")
     quota_total = models.PositiveBigIntegerField(default=1073741824)
 
