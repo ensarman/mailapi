@@ -20,12 +20,18 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from graphene_django.views import GraphQLView
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
-    path('sys_users/', include(('sys_users.urls', 'sys_users'), namespace="sys_users")),
-    path('mail_manager/', include(('virtual.urls', 'virtual'), namespace="mail")),
+    # path('api/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path(
+        'sys_users/',
+        include(('sys_users.urls', 'sys_users'),
+                namespace="sys_users")
+    ),
+    path(
+        'mail_manager/',
+        include(('virtual.urls', 'virtual'), namespace="mail")
+    ),
     path('logs/', include(('logs.urls', 'logs'), namespace="logs")),
     path('reports/', include(('reports.urls', 'reports'), namespace='reports')),
     path('', login_required(TemplateView.as_view(
