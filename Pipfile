@@ -23,7 +23,7 @@ django-graphql-jwt = "==0.3.1"
 file-read-backwards = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"
 
 [scripts]
 migrate = "python manage.py migrate"
