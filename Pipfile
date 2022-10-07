@@ -19,7 +19,7 @@ passlib = "*"
 bcrypt = "*"
 requests = "*"
 gunicorn = "*"
-django-graphql-jwt = "==0.3.1"
+django-graphql-jwt = "*"
 file-read-backwards = "*"
 
 [requires]
