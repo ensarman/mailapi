@@ -10,7 +10,7 @@
                             <div class="text-center">
                                 <form method="post">
                                     {% csrf_token %}
-                                    {{ form }}
+                                    {{ form.as_p }}
                                     <br />
                                     <button class="mt-1 btn btn-success" type="submit">Login</button>
                                 </form>
