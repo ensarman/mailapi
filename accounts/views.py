@@ -25,3 +25,10 @@ class ResetPasswordConfirm(auth_views.PasswordResetConfirmView):
 
 class ResetPasswordComplete(auth_views.PasswordResetCompleteView):
     template_name = "password_reset_complete.html"
+
+
+class LoginView(auth_views.LoginView):
+    """
+    To login ;)
+    """
+    template_name = "login.html"

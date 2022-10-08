@@ -1,4 +1,5 @@
-from django.contrib.auth.views import LoginView, get_user_model
+from django.contrib.auth import get_user_model
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.contrib.admin.views.decorators import staff_member_required
@@ -18,6 +19,7 @@ from .forms import CompanyForm, CreateUserForm
 from virtual.forms import DomainForm, UserForm as EmailForm
 from virtual.models import Domain, Alias, User as Email
 
+from accounts.views import LoginView
 
 # Create your views here.
 
@@ -26,7 +28,7 @@ class LoginView(LoginView):
     """
     To login ;)
     """
-    template_name = "sys_users/login.html"
+    #template_name = "sys_users/login.html"
     redirect_authenticated_user = True
     # success_url = reverse_lazy("mail:user_list")
     title = "Login Email Magnament"
