@@ -16,7 +16,12 @@ from ispmailadmin.secret import (
     SECRET_KEY,
     DATABASES,
     DOVECOT_HTTP,
-    ALLOWED_HOSTS
+    ALLOWED_HOSTS,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_USE_TLS,
+    EMAIL_HOST_USER,
+    EMAIL_HOST_PASSWORD
 )
 
 from django.db import migrations, models
@@ -50,6 +55,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'graphene_django',
     'sys_users',
+    'accounts',
     'virtual',
 ]
 
@@ -154,9 +160,20 @@ GRAPHENE = {
     ],
 }
 
+
 # Cambiar en producción
 # CORS_ORIGIN_ALLOW_ALL = True
 
 BYTE_TO_GIGABYTE_FACTOR = 1073741824
 MEGABYTE_TO_GIGABYTE_FACTOR = 1024
 KILOBYTE_TO_GIGABYTE_FACTOR = 1048576
+
+# send mail confifugration
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# los siguientes datos deben ir en el secret.py
+# EMAIL_HOST
+# EMAIL_PORT
+# EMAIL_USE_TLS
+# EMAIL_HOST_USER
+# EMAIL_HOST_PASSWORD

@@ -18,10 +18,15 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
-from graphene_django.views import GraphQLView
+
+
+# from graphene_django.views import GraphQLView
+
+admin.site.site_header = "Chasqui Admin"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path('accounts/', include('django.contrib.auth.urls')),
     # path('api/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path(
         'sys_users/',
@@ -32,8 +37,11 @@ urlpatterns = [
         'mail_manager/',
         include(('virtual.urls', 'virtual'), namespace="mail")
     ),
+    path('accounts/', include(('accounts.urls', 'accounts'), namespace="accounts")),
     path('logs/', include(('logs.urls', 'logs'), namespace="logs")),
     path('reports/', include(('reports.urls', 'reports'), namespace='reports')),
     path('', login_required(TemplateView.as_view(
-        template_name='main.html')), name="home")
+        template_name='main.html')), name="home"),
+
+
 ]

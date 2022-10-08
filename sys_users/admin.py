@@ -29,7 +29,8 @@ class SysUser(BaseUserAdmin):
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
     # inlines = (DomainInline,)
-    list_display = ('name', 'id_number', 'get_domains')
+    readonly_fields = ('start_date',)
+    list_display = ('name', 'id_number', 'get_domains', 'start_date')
     filter_horizontal = ('domain',)
     save_on_top = True
 
